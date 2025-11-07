@@ -1,0 +1,49 @@
+{
+    "id": "mizhael",
+    "is_player": true,
+    "static_profile": {
+      "name": "Mizhael",
+      "appearance": "Lean and weathered, with a crystalline gauntlet.",
+      "role": "Protagonist",
+      "faction": "Sundered Legion",
+      "personality": "Reluctant and introspective.",
+      "motivation": "Survive and find purpose amidst chaos.",
+      "preferred_combat_tactics": "Precision attacks using the Anchor",
+      "combat_behavior": {
+        "attack_priority": ["Energy Blade", "Basic Beam"],
+        "defensive_priority": ["Dodge", "Basic Barrier"],
+        "risk_tolerance": "medium"
+      }
+    },
+    "dynamic_state": {
+      "attributes": {
+        "Strength": 10,
+        "Agility": 11,
+        "Constitution": 10,
+        "Magic": 10,
+        "Willpower": 20
+      },
+      "skills": {
+        "Accuracy Melee": 10,
+        "Accuracy Ranged": 11,
+        "Evade": 12
+      },
+      "resources": {
+        "Max HP": 10,
+        "HP": 10,
+        "Max Stamina": 20,
+        "Stamina": 20,
+        "Max MP": 20,
+        "MP": 20,
+        "Max Focus": 20,
+        "Focus": 20,
+        "Max Daily Fatigue": 100,
+        "Daily Fatigue": 100
+      },
+      "status_effects": [],
+      "equipment": ["Anchor Gauntlet", "Cotton Shirt"],
+      "magic": ["Energy Blade", "Basic Barrier"],
+      "inventory": ["Health Potion"]
+    }
+  }
+  
