@@ -45,10 +45,6 @@ This document defines the structure and content for tracking player character (P
 
 #### Skills and Proficiencies:
 
-- **Accuracy Melee:** 10 (Description and level of proficiency)
-- **Accuracy Ranged:** 11 (Description and level of proficiency)
-- **Evade:** 13 (Description and level of proficiency)
-- **Anchor Proficiency** 10 (Red, Green, Blue Aspects)
 - **Stealth:** 7
 - **Perception:** 10
 
@@ -82,10 +78,7 @@ This document defines the structure and content for tracking player character (P
     (Protective gear like breastplates or tunics)
   - **Back:** None
     (Protective gear like cloaks or capes)
-  - **Gloves:** "Anchor" A crystalline gauntlet granting three distinct abilities:
-      1. **Red Aspect (Energy Blade):** Close-range melee attack.  
-      2. **Green Aspect (Basic Barrier):** Damage-absorbing barrier.  
-      3. **Blue Aspect (Basic Beam):** Precision ranged attack.  
+  - **Gloves:** None
     (Protective gear like gauntlets or gloves)
   - **Legs:** Linen Pants
     (Protective gear like trousers or greaves)

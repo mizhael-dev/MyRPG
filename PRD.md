@@ -167,7 +167,7 @@ Core principles:
   - Weapon position:
   - Stance: 
 
-IMPORTANT: More ideas are being drafted in Path: Combat_Ideas
+IMPORTANT: More ideas are being drafted in Folder: Combat_ideas. Files are numbered to reflect how ideas evolve. Combat1.md was the first file, next was Combat2.md
 
 
 ##### Resource consumption  
