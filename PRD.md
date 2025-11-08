@@ -18,14 +18,9 @@ tactical roguelike CRPG
 # 2. Setting and Theme
 
 ## Tone:
-
 - Inspired by Steven Erikson and Joe Abercrombie: morally grey characters, brutal realism, and cynical humor.
-- The world is in decay — magic is both salvation and corruption.
-
-## Visual & Narrative Direction:
-- Gritty, low-saturation environments.
-- Ruins, ashlands, and relics of forgotten wars.
 - Every spell and ability feels weighty and dangerous.
+- Gritty, low-saturation environments.
 
 # 3. Core Gamaplay Pillars
 
@@ -42,7 +37,7 @@ Power costs something — magic drains life, madness, or stability.
 - very physical attack can be stronger or weaker depending how much mana the user puts into it
 
 # 4. World and Exploration
-- Semi-open world with handcrafted hubs and procedural wilderness zones.
+- Semi-open world with handcrafted hubs and procedural wilderness/dungeon/combat zones.
 - Environmental interaction: collapsing bridges, setting fires, or redirecting water can alter battles.
 
 
@@ -171,6 +166,8 @@ Core principles:
   - Shoulders:
   - Weapon position:
   - Stance: 
+
+IMPORTANT: More ideas are being drafted in Path: Combat_Ideas
 
 
 ##### Resource consumption  
