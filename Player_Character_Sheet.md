@@ -2,11 +2,6 @@
 
 This document defines the structure and content for tracking player character (PC) details. It ensures seamless continuity between sessions and provides a foundation for character progression. The "Player Character Sheet" file is critical for maintaining consistency and enabling effective roleplay.
 
-**ALWAYS verify that player's requested actions align with documented skills, abilities, or spells in the character sheet before proceeding.**
-If a player requests an action beyond their abilities:
--  Explain why the action is not possible.
--  Suggest an in-character alternative.
-
 ---
 
 ### 1. Basic Information
@@ -57,49 +52,6 @@ If a player requests an action beyond their abilities:
 - **Stealth:** 7
 - **Perception:** 10
 
-#### Special Abilities:
-
-##### **Anchor Abilities**
-
----
-
-**1. Red Aspect: Energy Blade**
-- **Game Mechanic:**  
-  - **Cost:** MP: 10, Stamina: 5, Focus: 15  
-  - **Difficulty:** Treat it as a melee attack (e.g., like a sword).  
-  - **Effect:** Close-range attack dealing **15 damage**.
-
-- **In-Game Effect:**  
-  Creates an energy blade for a single close-range attack, glowing crimson with destructive power. The blade cuts with the ferocity of raw energy.
-
----
-
-**2. Green Aspect: Basic Barrier**
-- **Game Mechanic:**  
-  - **Cost:** MP: 10, Stamina: 3, Focus: 13  
-  - **Difficulty:** Base Difficulty **20** (lower due to its defensive nature).  
-  - **Effect:** Creates a dome-shaped barrier over yourself or a **2m area** around you that absorbs **20 damage**.
-
-- **In-Game Effect:**  
-  A shimmering green dome forms, absorbing damage from attacks. The barrier can block projectiles, melee strikes, and some magical effects, depending on its strength.
-
----
-
-**3. Blue Aspect: Basic Beam**
-- **Game Mechanic:**  
-  - **Cost:** MP: 15, Stamina: 1, Focus: 16  
-  - **Difficulty:** Treat it as a ranged attack (e.g., like a crossbow) with a **+10 accuracy bonus**.  
-  - **Effect:** Single-target beam dealing **10 damage**, bypassing light armor.
-
-- **In-Game Effect:**  
-  A thin, concentrated beam of blue energy fires from the gauntlet, striking with pinpoint accuracy. The beam is particularly effective against lightly armored targets.
-
----
-
-**General Notes**
-- **Resource Costs:** MP, Stamina, and Focus are consumed with each use.  
-- **Scaling Effects:** Outcomes and resource penalties depend on the success of rolls.  
-- **Balance:** Each ability is designed for a specific situation (offense, defense, or precision), encouraging tactical use of resources.
 
 ---
 
@@ -114,13 +66,13 @@ If a player requests an action beyond their abilities:
 \**Jewelry: Accessories like rings (max 10) and amulets (max 3). Jewelry often grants magical or social bonuses.*
 
 - **Weapons:**
-  - **Belt 1:** 
+  - **Belt 1:** None
     (Small weapons like daggers or short swords and their damage stat)
-  - **Belt 2:**
+  - **Belt 2:** None
     (Small weapons like daggers or short swords and their damage stat)
-  - **Back 1:** Shovel, Damage: 1
+  - **Back 1:** None
     (Larger weapons like bows or long swords and their damage stat)
-  - **Back 2:**
+  - **Back 2:** None
     (Larger weapons like bows or long swords and their damage stat)
   
 - **Armor and Clothing:**
@@ -144,16 +96,16 @@ If a player requests an action beyond their abilities:
   - **Rings:** None
     (Accessories like rings, max 10)
   - **Amulets:** None
-    (Accessories like amulets, max 3) (max 3)
+    (Accessories like amulets, max 3)
 
 #### Inventory:
 
-\**Pockets:* Small items for quick access, such as potions, keys, or tools. Limited to 3-5 items depending on size.*
+\**Pockets:* Small items for quick access, such as potions, keys, or tools. Limited to 1-3 items depending on size.*
 
 \**Backpack: Larger items for storage, including rations, books, or extra equipment. Accessibility is limited, and capacity depends on weight and size.*
 
 - **Pockets (Easy Access):**
-  - Pocket 1: (Small items for quick access like potions, keys, or tools; 3-5 items depending on size)
+  - Pocket 1: (Small items for quick access like potions, keys, or tools; 1-3 items depending on size)
 - **Backpack (Difficult Access):**
   - Backpack 1: (Larger items for storage like rations, extra weapons, or books; limited by weight and size)
 
