@@ -1,0 +1,90 @@
+{
+  "id": "thrust",
+  "name": "Thrust",
+  "description": "A forward stabbing attack with the weapon. Faster than slash, with forward momentum.",
+  "type": "attack",
+  "school": "none",
+  "phases": {
+    "windUp": {
+      "duration": 1000,
+      "canCancel": true,
+      "canFeint": true,
+      "description": "Attacker draws weapon back, preparing to thrust forward"
+    },
+    "committed": {
+      "duration": 500,
+      "canCancel": false,
+      "canFeint": false,
+      "description": "Committed to the thrust, body weight moving forward"
+    },
+    "impact": {
+      "tick": 1500,
+      "description": "Weapon tip reaches the target"
+    },
+    "recovery": {
+      "duration": 700,
+      "description": "Pulling back from extended position, resetting stance"
+    }
+  },
+  "costs": {
+    "stamina": {
+      "base": 2,
+      "variablePower": {
+        "min": 1,
+        "max": 3,
+        "description": "Can use 50% less (1 stamina) for weaker/slower attack, or 50% more (3 stamina) for stronger/faster attack"
+      }
+    },
+    "mp": 0,
+    "focus": 2,
+    "dailyFatigue": 2
+  },
+  "telegraphs": [
+    {
+      "stage": 1,
+      "bodyPart": "foot",
+      "triggerTime": 150,
+      "visibilityPercent": 20,
+      "description": "Weight shifts to back foot, preparing for forward lunge",
+      "possibleSkills": ["slash", "thrust", "upward_strike"]
+    },
+    {
+      "stage": 2,
+      "bodyPart": "shoulders",
+      "triggerTime": 400,
+      "visibilityPercent": 40,
+      "description": "Shoulders pull back, weapon retracting for thrust",
+      "possibleSkills": ["thrust", "upward_strike"]
+    },
+    {
+      "stage": 3,
+      "bodyPart": "weapon",
+      "triggerTime": 750,
+      "visibilityPercent": 70,
+      "description": "Weapon aligned with target, point forward",
+      "possibleSkills": ["thrust"]
+    },
+    {
+      "stage": 4,
+      "bodyPart": "stance",
+      "triggerTime": 1100,
+      "visibilityPercent": 95,
+      "description": "Full commitment, body leaning forward into thrust",
+      "possibleSkills": ["thrust"]
+    }
+  ],
+  "damage": {
+    "type": "piercing",
+    "baseValue": 1,
+    "scaling": {
+      "strength": 0.8,
+      "agility": 0.4
+    },
+    "notes": "In prototype: 1 clean hit = death, contributes 1 to the 3-hit death counter. Better against armored targets (future)."
+  },
+  "metadata": {
+    "weaponTypes": ["sword", "spear", "dagger"],
+    "tags": ["basic", "melee", "piercing", "fast"],
+    "learningDifficulty": "easy"
+  }
+}

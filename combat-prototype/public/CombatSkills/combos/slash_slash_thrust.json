@@ -1,0 +1,150 @@
+{
+  "id": "slash_slash_thrust_combo",
+  "name": "Basic Assault Combo",
+  "description": "A fundamental three-strike combination: two horizontal slashes followed by a finishing thrust. The rhythm and momentum of the sequence grants bonuses to speed and efficiency.",
+  "type": "combo",
+  "school": "none",
+  "sequence": [
+    {
+      "step": 1,
+      "skillId": "slash",
+      "name": "Opening Slash",
+      "bonuses": {},
+      "description": "First slash - no bonuses, establishes the combo rhythm"
+    },
+    {
+      "step": 2,
+      "skillId": "slash",
+      "name": "Follow-up Slash",
+      "bonuses": {
+        "windUpReduction": 200,
+        "staminaReduction": 1,
+        "description": "Second slash flows from the first - faster wind-up (-200ms) and more efficient (-1 stamina)"
+      },
+      "modifiedPhases": {
+        "windUp": {
+          "originalDuration": 1400,
+          "modifiedDuration": 1200,
+          "description": "Weapon already in motion from first slash"
+        }
+      },
+      "modifiedCosts": {
+        "stamina": {
+          "original": 2,
+          "modified": 1,
+          "description": "Momentum from first slash reduces effort needed"
+        }
+      }
+    },
+    {
+      "step": 3,
+      "skillId": "thrust",
+      "name": "Finishing Thrust",
+      "bonuses": {
+        "windUpReduction": 600,
+        "staminaReduction": 1,
+        "description": "Thrust flows naturally from second slash - much faster wind-up (-600ms) and more efficient (-1 stamina)"
+      },
+      "modifiedPhases": {
+        "windUp": {
+          "originalDuration": 1000,
+          "modifiedDuration": 400,
+          "description": "Transitioning from horizontal slash to forward thrust with built momentum"
+        }
+      },
+      "modifiedCosts": {
+        "stamina": {
+          "original": 2,
+          "modified": 1,
+          "description": "Maximum efficiency from continuous motion"
+        }
+      }
+    }
+  },
+  "totalCosts": {
+    "stamina": {
+      "withoutCombo": 6,
+      "withCombo": 4,
+      "savings": 2,
+      "description": "Combo saves 2 stamina compared to executing skills independently"
+    },
+    "focus": {
+      "withoutCombo": 6,
+      "withCombo": 4,
+      "description": "Focus cost calculated from stamina cost"
+    },
+    "dailyFatigue": {
+      "withoutCombo": 6,
+      "withCombo": 4,
+      "description": "Daily fatigue calculated from stamina cost"
+    }
+  },
+  "totalDuration": {
+    "withoutCombo": 5200,
+    "withCombo": 4400,
+    "savings": 800,
+    "breakdown": {
+      "slash1": 2800,
+      "slash2": 2600,
+      "thrust": 1800,
+      "note": "Overlapping recovery and wind-up phases when executed as combo"
+    },
+    "description": "Combo saves 800ms compared to executing skills with full recovery between each"
+  },
+  "comboTelegraphs": {
+    "predictability": "high",
+    "description": "Combos are easier to predict than individual skills. After first slash, experienced opponents can anticipate the pattern.",
+    "firstSkillTelegraphs": "normal",
+    "subsequentSkills": {
+      "visibilityBonus": 20,
+      "description": "Each skill in combo sequence is 20% easier to predict due to established pattern"
+    },
+    "counterplay": {
+      "opponentReadsEarlier": true,
+      "opponentHasMoreTime": true,
+      "description": "Defender can prepare defense earlier once combo pattern is recognized"
+    }
+  },
+  "strategicConsiderations": {
+    "advantages": [
+      "Significant stamina savings (2 stamina over 3 attacks)",
+      "Faster execution (800ms saved)",
+      "Maintains offensive pressure through continuous attacks",
+      "Efficient resource usage for sustained aggression"
+    ],
+    "disadvantages": [
+      "Highly predictable - experienced opponents will read the pattern",
+      "Commits to three attacks - difficult to cancel mid-combo",
+      "Defender gains more time to prepare once pattern recognized",
+      "Repetition makes telegraphs easier to read"
+    ],
+    "bestUsedWhen": [
+      "Opponent is low on stamina and can't afford multiple defenses",
+      "Overwhelming defensive opponent with sustained pressure",
+      "Need to maximize damage while conserving stamina",
+      "Opponent hasn't seen your combo pattern yet"
+    ],
+    "avoidWhen": [
+      "Opponent has shown they can read combo patterns",
+      "You've used this combo multiple times already",
+      "Opponent is waiting for predictable attack",
+      "You need flexibility to adapt mid-sequence"
+    ]
+  },
+  "requirements": {
+    "mustExecuteInSequence": true,
+    "cannotSkipSteps": true,
+    "canBreakCombo": {
+      "byFeinting": true,
+      "byDefending": false,
+      "byTakingHit": true,
+      "description": "Can break combo by feinting any skill in sequence, or if hit during combo. Cannot switch to defense mid-combo."
+    }
+  },
+  "metadata": {
+    "weaponTypes": ["sword", "dagger"],
+    "tags": ["combo", "basic", "melee", "aggressive", "stamina-efficient"],
+    "learningDifficulty": "easy",
+    "notes": "Foundation combo for learning combo mechanics. Efficient but predictable. Use sparingly and mix with other attacks to avoid being read. Most effective as a finisher when opponent is already pressured."
+  }
+}

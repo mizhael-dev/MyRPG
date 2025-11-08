@@ -1,0 +1,89 @@
+{
+  "id": "slash",
+  "name": "Slash",
+  "description": "A horizontal slashing attack with the weapon. Medium speed and damage.",
+  "type": "attack",
+  "school": "none",
+  "phases": {
+    "windUp": {
+      "duration": 1400,
+      "canCancel": true,
+      "canFeint": true,
+      "description": "Attacker prepares the slash, telegraphs become progressively visible"
+    },
+    "committed": {
+      "duration": 600,
+      "canCancel": false,
+      "canFeint": false,
+      "description": "Committed to the attack, weapon in motion, cannot be cancelled"
+    },
+    "impact": {
+      "tick": 2000,
+      "description": "The blade connects with the target"
+    },
+    "recovery": {
+      "duration": 800,
+      "description": "Following through the slash, regaining balance and guard position"
+    }
+  },
+  "costs": {
+    "stamina": {
+      "base": 2,
+      "variablePower": {
+        "min": 1,
+        "max": 3,
+        "description": "Can use 50% less (1 stamina) for weaker/slower attack, or 50% more (3 stamina) for stronger/faster attack"
+      }
+    },
+    "mp": 0,
+    "focus": 2,
+    "dailyFatigue": 2
+  },
+  "telegraphs": [
+    {
+      "stage": 1,
+      "bodyPart": "foot",
+      "triggerTime": 200,
+      "visibilityPercent": 20,
+      "description": "Weight shifts to front foot, stance widens slightly",
+      "possibleSkills": ["slash", "thrust", "diagonal_slash"]
+    },
+    {
+      "stage": 2,
+      "bodyPart": "shoulders",
+      "triggerTime": 600,
+      "visibilityPercent": 40,
+      "description": "Shoulders rotate horizontally, opening striking angle",
+      "possibleSkills": ["slash", "diagonal_slash"]
+    },
+    {
+      "stage": 3,
+      "bodyPart": "weapon",
+      "triggerTime": 1000,
+      "visibilityPercent": 60,
+      "description": "Weapon begins horizontal arcing motion",
+      "possibleSkills": ["slash", "diagonal_slash"]
+    },
+    {
+      "stage": 4,
+      "bodyPart": "stance",
+      "triggerTime": 1500,
+      "visibilityPercent": 95,
+      "description": "Full commitment, body aligned for horizontal slash, weapon at apex of arc",
+      "possibleSkills": ["slash"]
+    }
+  ],
+  "damage": {
+    "type": "slashing",
+    "baseValue": 1,
+    "scaling": {
+      "strength": 1.0
+    },
+    "notes": "In prototype: 1 clean hit = death, contributes 1 to the 3-hit death counter"
+  },
+  "metadata": {
+    "weaponTypes": ["sword", "axe", "dagger"],
+    "tags": ["basic", "melee", "horizontal"],
+    "learningDifficulty": "easy"
+  }
+}

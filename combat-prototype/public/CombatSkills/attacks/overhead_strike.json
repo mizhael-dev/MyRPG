@@ -1,0 +1,93 @@
+{
+  "id": "overhead_strike",
+  "name": "Overhead Strike",
+  "description": "A powerful downward strike. Slow but devastating, difficult to parry.",
+  "type": "attack",
+  "school": "none",
+  "phases": {
+    "windUp": {
+      "duration": 1600,
+      "canCancel": true,
+      "canFeint": true,
+      "description": "Attacker raises weapon high overhead, building momentum"
+    },
+    "committed": {
+      "duration": 600,
+      "canCancel": false,
+      "canFeint": false,
+      "description": "Weapon descending with full force, cannot be stopped"
+    },
+    "impact": {
+      "tick": 2200,
+      "description": "Weapon crashes down on target from above"
+    },
+    "recovery": {
+      "duration": 1000,
+      "description": "Long recovery as weapon momentum continues downward, leaving attacker exposed"
+    }
+  },
+  "costs": {
+    "stamina": {
+      "base": 3,
+      "variablePower": {
+        "min": 2,
+        "max": 4,
+        "description": "Can use 50% less (2 stamina) for weaker/slower attack, or 50% more (4 stamina) for devastating strike"
+      }
+    },
+    "mp": 0,
+    "focus": 3,
+    "dailyFatigue": 3
+  },
+  "telegraphs": [
+    {
+      "stage": 1,
+      "bodyPart": "foot",
+      "triggerTime": 300,
+      "visibilityPercent": 25,
+      "description": "Feet plant firmly, stance stabilizing for vertical strike",
+      "possibleSkills": ["overhead_strike"]
+    },
+    {
+      "stage": 2,
+      "bodyPart": "shoulders",
+      "triggerTime": 700,
+      "visibilityPercent": 45,
+      "description": "Shoulders and arms begin rising, lifting weapon overhead",
+      "possibleSkills": ["overhead_strike"]
+    },
+    {
+      "stage": 3,
+      "bodyPart": "weapon",
+      "triggerTime": 1200,
+      "visibilityPercent": 75,
+      "description": "Weapon reaches apex above head, poised to descend",
+      "possibleSkills": ["overhead_strike"]
+    },
+    {
+      "stage": 4,
+      "bodyPart": "stance",
+      "triggerTime": 1700,
+      "visibilityPercent": 95,
+      "description": "Full commitment, weapon begins violent descent",
+      "possibleSkills": ["overhead_strike"]
+    }
+  ],
+  "damage": {
+    "type": "crushing",
+    "baseValue": 1,
+    "scaling": {
+      "strength": 1.5
+    },
+    "notes": "In prototype: 1 clean hit = death. High stamina cost but breaks through weak defenses. Long recovery leaves attacker vulnerable if it misses."
+  },
+  "specialProperties": {
+    "breaksDefense": true,
+    "description": "Can break through parries that don't use extra stamina to widen defense window"
+  },
+  "metadata": {
+    "weaponTypes": ["sword", "axe", "hammer", "greatsword"],
+    "tags": ["power", "melee", "crushing", "slow", "high-risk"],
+    "learningDifficulty": "medium"
+  }
+}

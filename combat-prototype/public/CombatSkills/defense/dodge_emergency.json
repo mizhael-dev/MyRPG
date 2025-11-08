@@ -1,0 +1,69 @@
+{
+  "id": "dodge_emergency",
+  "name": "Emergency Dodge",
+  "description": "A desperate last-moment evasive maneuver. Can be executed very late but costs high stamina and leaves you vulnerable.",
+  "type": "defense",
+  "school": "none",
+  "phases": {
+    "windUp": {
+      "duration": 100,
+      "canCancel": false,
+      "canFeint": false,
+      "description": "Explosive reaction, throwing body out of harm's way"
+    },
+    "active": {
+      "duration": 300,
+      "description": "Desperate evasive movement - uncontrolled"
+    },
+    "recovery": {
+      "duration": 1200,
+      "description": "Long recovery as defender struggles to regain footing and guard from awkward position"
+    }
+  },
+  "costs": {
+    "stamina": {
+      "base": 4,
+      "description": "High stamina cost due to explosive movement and long recovery"
+    },
+    "mp": 0,
+    "focus": 4,
+    "dailyFatigue": 4
+  },
+  "defensiveProperties": {
+    "defenseType": "panic_evasion",
+    "damageReduction": 0.5,
+    "description": "Reduces damage by 50% but doesn't completely negate it. Can be executed just before or at Impact tick.",
+    "effectiveWindow": {
+      "startRelativeTo": "attackerImpactTick",
+      "offsetBefore": 200,
+      "offsetAfter": 0,
+      "description": "Can be initiated very late - up to 200ms before Impact, even at Impact tick itself"
+    },
+    "onSuccess": {
+      "damageReduced": 0.5,
+      "longRecovery": true,
+      "leavesVulnerable": true,
+      "description": "Reduces incoming damage but long recovery (1200ms) leaves defender vulnerable to follow-up"
+    },
+    "onFailure": {
+      "takesFullDamage": true,
+      "description": "If mistimed completely, takes full damage AND suffers long recovery"
+    }
+  },
+  "requirements": {
+    "desperateCircumstances": true,
+    "highStaminaCost": true,
+    "timingFlexible": true
+  },
+  "specialProperties": {
+    "lastResort": true,
+    "canInterruptOwnAction": true,
+    "description": "Can be used as a last resort when other defenses aren't ready. Can interrupt your own wind-up phase to execute emergency dodge."
+  },
+  "metadata": {
+    "weaponTypes": ["any"],
+    "tags": ["defense", "evasion", "emergency", "high-cost", "desperation"],
+    "learningDifficulty": "easy",
+    "notes": "Panic button for when you misread telegraphs or realize too late. Keeps you alive but at great cost. Long recovery makes you vulnerable to follow-up attacks. Use sparingly."
+  }
+}

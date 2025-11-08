@@ -1,0 +1,84 @@
+{
+  "id": "counter",
+  "name": "Counter Attack",
+  "description": "A swift riposte following a successful parry. Exploits the attacker's recovery phase for a lightning-fast counter-strike.",
+  "type": "special",
+  "subtype": "follow-up",
+  "school": "none",
+  "phases": {
+    "windUp": {
+      "duration": 200,
+      "canCancel": false,
+      "canFeint": false,
+      "description": "Lightning-fast preparation, weapon already in position from parry"
+    },
+    "committed": {
+      "duration": 300,
+      "canCancel": false,
+      "canFeint": false,
+      "description": "Swift strike toward vulnerable attacker"
+    },
+    "impact": {
+      "tick": 500,
+      "description": "Counter-strike lands while attacker is still recovering"
+    },
+    "recovery": {
+      "duration": 400,
+      "description": "Returning to guard after counter"
+    }
+  },
+  "costs": {
+    "stamina": {
+      "base": 2
+    },
+    "mp": 0,
+    "focus": 3,
+    "dailyFatigue": 2,
+    "notes": "High focus cost represents the mental clarity needed to execute counter while under pressure"
+  },
+  "requirements": {
+    "triggerCondition": "successful_parry",
+    "mustBeExecutedDuring": "extended_attacker_recovery",
+    "windowDuration": 200,
+    "description": "Can only be used after successfully parrying an attack. Must be initiated within the 200ms counter window."
+  },
+  "telegraphs": [
+    {
+      "stage": 1,
+      "bodyPart": "weapon",
+      "triggerTime": 50,
+      "visibilityPercent": 30,
+      "description": "Weapon redirects from parry position toward attacker",
+      "possibleSkills": ["counter"]
+    },
+    {
+      "stage": 2,
+      "bodyPart": "stance",
+      "triggerTime": 150,
+      "visibilityPercent": 80,
+      "description": "Body weight shifts toward attacker, exploiting their extended position",
+      "possibleSkills": ["counter"]
+    }
+  ],
+  "damage": {
+    "type": "slashing",
+    "baseValue": 1,
+    "scaling": {
+      "agility": 1.2,
+      "strength": 0.5
+    },
+    "notes": "In prototype: 1 clean hit = death. Counter is very fast but attacker is still in recovery, making defense difficult."
+  },
+  "specialProperties": {
+    "ignoresTelegraphs": false,
+    "attackerStillInRecovery": true,
+    "highSuccessRate": true,
+    "description": "Attacker is still in recovery phase from their attack, making them vulnerable. However, telegraphs are still visible and can be read."
+  },
+  "metadata": {
+    "weaponTypes": ["sword", "dagger"],
+    "tags": ["special", "follow-up", "counter", "fast", "high-focus"],
+    "learningDifficulty": "hard",
+    "notes": "Rewards successful parry with opportunity for immediate counter. Requires good focus management. Master parry timing to unlock counter opportunities."
+  }
+}

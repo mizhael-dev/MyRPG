@@ -2,7 +2,7 @@ Game PRD - "MyRPG"
 
 # 1. Vision Statement
 
-Create a grimdark fantasy with magic tactical roguelike CRPG where every decision matters, combat is turn-based but deterministic, and player skill, positioning, and foresight determine survival — not random chance.
+Create a grimdark fantasy with magic tactical roguelike CRPG where every decision matters, combat is atomic-turn-based but deterministic, and player skill, positioning, and foresight determine survival — not random chance.
 Every spell, ability, action feels weighty and dangerous.
 Combat is fast and deadly (no inflated hp encounters).
 Set in a world of fading empires, dying gods, and unstable magic, where power comes at a price.
@@ -11,9 +11,6 @@ The first version will focus on gameplay mechanic not the story or the world.
 ### Genre
 tactical roguelike CRPG
 
-### Procedurally generated
-- maps
-- combat encounters
 
 # 2. Setting and Theme
 
@@ -56,18 +53,27 @@ I want to be able to iterate fast, I don't need polish for now
 
 # 5. Features:
 
-### In scope
+### In scope Must haves
+- Atomic turn based tactical combat (A big focus)
+- Resource consumption and management
+- Combat skills system (attacks, defenses, telegraphs)
+- Telegraph UI and prediction system
+
+### In scope Nice to haves
 - Inventory management
 - Equipment management
 - Player Character (PC) stats and derived stats
-- Resource consumption and management
 - Non-Player Character (NPC) stats and derived stats
-- Turn based tactical combat (A big focus)
 - Procedurally generated encounters
 - journal
 - saving
 
-### Out of Scope for now
+### Out of Scope for now (Will be added later)
+- Movement mechanics (tactical map positioning, collision resolution)
+- Magic and spell combat skills
+- Armor mechanics and damage mitigation
+- Weapon range mechanics
+- Line of sight and visibility systems
 - AI game master and AI generated stories
   
 
@@ -102,72 +108,28 @@ Core principles:
 
 
 ## Combat Skills
-- **Skill Name:** Slash
-- **Descritpion:** Attacker shlashes with the weapons
-- **Cost:**
-  - Stamina: 2
-- **Cast Time:** 2000ms
-- **Recovery Time:** 100ms
-- **Skill School:** None
-- **Telegraphs:**
-  - Foot:
-  - Shoulders:
-  - Weapon position:
-  - Stance: 
 
-- **Skill Name:** Thurst
-- **Descritpion:** Attacker thurst with the weapons
-- **Cost:**
-  - Stamina: 2
-- **Cast Time:** 1500ms
-- **Recovery Time:** 100ms
-- **Skill School:** None
-- **Telegraphs:**
-  - Foot:
-  - Shoulders:
-  - Weapon position:
-  - Stance: 
+All combat skills are defined in JSON format for data-driven design and easy iteration. Skills are organized by type:
 
-- **Combo Name:** Thurst
-- **Descritpion:** a most basic combo Slash, Slash, Thurst
-- **Skill School:** None
-- **Combo Bonus:**
-  - Slash: None
-  - Slash: -200ms Cast Time, -1 stamina cost
-  - Thrust: -600ms Cast Time, -1 stamina cost
- - **Telegraphs:**
-  - Foot:
-  - Shoulders:
-  - Weapon position:
-  - Stance: 
+**Location:** `/CombatSkills/`
 
-- **Skill Name:** Weapon Parry
-- **Descritpion:** Defender blocks attack with a weapon taking no damage and readies a counter
-- **Cost:**
-  - Stamina: 1 + 50% attackers stamina spend if defended succesfully
-- **Cast Time:** 1000ms
-- **Recovery Time:** 100ms
-- **Skill School:** None
-- **Telegraphs:**
-  - Foot:
-  - Shoulders:
-  - Weapon position:
-  - Stance: 
+**Structure:**
+- `/CombatSkills/attacks/` - Offensive combat skills (Slash, Thrust, Overhead Strike, etc.)
+- `/CombatSkills/defense/` - Defensive combat skills (Parry, Dodge, Block, etc.)
+- `/CombatSkills/special/` - Special combat skills (Counter, Feint, etc.)
+- `/CombatSkills/combos/` - Predefined skill combinations with bonuses
 
-- **Skill Name:** Weapon Parry
-- **Descritpion:** Defender blocks attack with a weapon taking no damage and readies a counter
-- **Cost:**
-  - Stamina: 1 + 25% attackers stamina spend if defended succesfully
-- **Cast Time:** 500ms
-- **Recovery Time:** 500ms
-- **Skill School:** None
-- **Telegraphs:**
-  - Foot:
-  - Shoulders:
-  - Weapon position:
-  - Stance: 
+Each skill JSON includes:
+- Basic info (id, name, description, type, school)
+- Combat phases (wind-up, committed, impact, recovery durations)
+- Telegraph stages (bodyPart, visibility%, triggerTime, description, possibleSkills[])
+- Resource costs (stamina, mp, focus, dailyFatigue)
+- Damage/defense specifications
+- Variable power modifiers (±50% for stamina/MP adjustment)
 
-IMPORTANT: More ideas are being drafted in Folder: Combat_ideas. Files are numbered to reflect how ideas evolve. Combat1.md was the first file, next was Combat2.md
+See `/CombatSkills/` folder for all skill definitions.
+
+IMPORTANT: More detailed combat mechanics are documented in Combat3 series files (Combat3 - atomic_turns.md, Combat3 - TechStack.md).
 
 
 ##### Resource consumption  
@@ -180,18 +142,18 @@ IMPORTANT: More ideas are being drafted in Folder: Combat_ideas. Files are numbe
 ##### **Resource System**
 1. **MP (Magic Points):**  
    - **Maximum MP:** Determined by Magic Attribute × 2.  
-   - **Regeneration:** 
+   - **Regeneration:**
      - Fully replenished outside of combat via rest or meditation.
-     - Can regenerate 5 per turn in combat when concentrating and not interrupted.  
+     - Can regenerate 5 per `<regeneration_rate>` in combat when concentrating and not interrupted.  
    - **Exhaustion Penalty:** Casting with no MP drains HP (1 HP per 1 MP used).
    - **Bonus use:** User can choose to use up to 50% more or 50% less MP for an attack. More for more damage and faster attack. Less for a faint or carefoul resource management.
 
-2. **Stamina (Physical Energy):**  
-   - **Maximum Stamina:** Equal to the Constitution Attribute.  
+2. **Stamina (Physical Energy):**
+   - **Maximum Stamina:** Equal to the Constitution Attribute × 2.  
    - **Regeneration:**
      - Fully replenished outside of combat via rest.
-     - Regenerates 1 per turn in combat.
-     - Regenerates 4 per turn in combat when defending.
+     - Regenerates 1 per `<regeneration_rate>` in combat.
+     - Regenerates 4 per `<regeneration_rate>` in combat when defending.
    - **Exhaustion Penalty:** Taking actions with no Stamina drains HP (1 HP per 2 Stamina used).
    - **Bonus use:** User can choose to use up to 50% more or 50% less stamina for an attack. More for more damage and faster attack. Less for a faint or carefoul resource management.
 
@@ -199,21 +161,46 @@ IMPORTANT: More ideas are being drafted in Folder: Combat_ideas. Files are numbe
    - **Maximum Focus:** Equal to the Willpower Attribute.  
    - **Regeneration:**
      - Fully replenished outside of combat via rest
-     - Regenerates 2 per turn in combat.
-     - Regenerates 4 per trun in combat, when sitting down.
+     - Regenerates 2 per `<regeneration_rate>` in combat.
+     - Regenerates 4 per `<regeneration_rate>` in combat, when sitting down.
    - **Cost Calculation:** **Focus cost = MP cost + Stamina cost.**
    - **Exhaustion Penalty:** Taking actions with no Focus drains HP (1 HP per 2 Focus used).  
    - **Reason for mechanic:** chaaracters get tired when fighting longer battles. Makes combat more interestinga and tactical. Requires smart repositioning and depending on others to catch a breath. No single character can overwhelm an army. Makes longer combat encounters more challanging and adds aspect of resource management.
 
 
-4. **Daily Fatigue:**  
-   - **Maximum Daily Fatigue:** Equal to the Willpower Attribute multiplied by 5.  
+4. **Daily Fatigue:**
+   - **Maximum Daily Fatigue:** Equal to the Willpower Attribute multiplied by 5.
    - **Regeneration:**
      - Fully replenished outside of combat via long rest (sleep) for at least 6 hours.
      - No regeneration occurs during short rests or meditation; those actions restore only MP, Stamina, and Focus.
    - **Cost Calculation:** **Daily Fatigue cost = MP cost + Stamina cost.**
    - **Exhaustion Penalty:** Taking actions with no Daily Fatigue drains HP (1 HP per 5 Daily Fatigue used).
    - **Reason for mechanic:** lock player from unlimited grinding without rest. Makes longer adventures more challanging and adds aspect of resource management.
+
+**Note:** `<regeneration_rate>` is a variable that needs balancing through playtesting. Initial estimate: 1000ms (1 second), but will be adjusted based on combat pacing.
+
+##### **Damage System (First Prototype)**
+
+For the initial prototype, combat is extremely deadly:
+- **1 clean hit (successful attack with no defense) = instant death**
+- **3 hits of any kind (blocked, parried, or glancing) = death**
+
+This simplified system allows us to focus on the core atomic turn mechanics and telegraph reading without complex damage calculations. More sophisticated damage systems will be added later.
+
+##### **Telegraph UI (Visual Design)**
+
+Telegraphs will be displayed using **manga-style panels** showing close-ups of body parts with clear text labels:
+- Example: Panel shows a leg with large text "FOOT BACK"
+- Example: Panel shows shoulders with text "SHOULDER ROTATION"
+
+**Prediction Display:**
+- Shows possible attacks and their probability percentages
+  - e.g., "Foot back" is a telegraph for both "Horizontal Slash" and "Thrust" but not for "Overhead Strike"
+  - After first telegraph: "50% Slash, 50% Thrust"
+- **Timebar_NPC_seen_by_PC** displays:
+  - Minimum time (fastest possible attack from visible telegraphs)
+  - Maximum time (slowest possible attack from visible telegraphs)
+  - Uncertainty shading narrows as more telegraphs are revealed
 
 # 10. Next Steps
 

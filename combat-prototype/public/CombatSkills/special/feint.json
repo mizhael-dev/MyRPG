@@ -1,0 +1,102 @@
+{
+  "id": "feint",
+  "name": "Feint",
+  "description": "Cancel an attack during wind-up to bait opponent into committing to a defense. Tests opponent's patience and reads.",
+  "type": "special",
+  "subtype": "deception",
+  "school": "none",
+  "mechanics": {
+    "cancelType": "early_cancel",
+    "description": "Feint is executed by cancelling an attack during its Wind-up phase (before Committed phase)",
+    "execution": {
+      "requiresActiveAttack": true,
+      "mustBeInPhase": "windUp",
+      "cannotCancelAfter": "committed",
+      "description": "Must have an attack in wind-up phase. Cannot feint once committed to the attack."
+    }
+  },
+  "phases": {
+    "feintExecution": {
+      "duration": 200,
+      "description": "Aborting attack motion, resetting to neutral stance"
+    },
+    "recovery": {
+      "duration": 400,
+      "description": "Returning to guard position after feint"
+    }
+  },
+  "costs": {
+    "stamina": {
+      "refund": 0.5,
+      "description": "Refunds 50% of stamina spent on the cancelled attack's wind-up"
+    },
+    "mp": 0,
+    "focus": 1,
+    "dailyFatigue": {
+      "fromCancelledAttack": 0.5,
+      "description": "Still costs 50% of cancelled attack's daily fatigue - feinting is mentally taxing"
+    },
+    "notes": "Feinting costs less than completing an attack but isn't free. Stamina partially refunded but focus and fatigue still spent."
+  },
+  "tacticalEffects": {
+    "baitsDefense": true,
+    "revealsOpponentStrategy": true,
+    "description": "If opponent commits to a defense (parry, dodge) in response to your feint, they waste stamina and reveal their defensive preference",
+    "onOpponentCommits": {
+      "opponentWastesStamina": true,
+      "youGainInformation": true,
+      "createOpening": true,
+      "description": "Opponent's defense goes into recovery while you're already reset and ready to attack"
+    },
+    "onOpponentWaits": {
+      "noAdvantage": true,
+      "description": "If opponent doesn't commit to defense, feint wastes your own resources with no benefit"
+    }
+  },
+  "telegraphsRevealed": {
+    "dependsOnCancelTiming": true,
+    "description": "Earlier you cancel, fewer telegraphs opponent sees. Later cancels reveal more information.",
+    "examples": [
+      {
+        "cancelAt": "20% wind-up (200ms into slash)",
+        "telegraphsRevealed": 1,
+        "opponentKnows": "You were preparing an attack but not which one"
+      },
+      {
+        "cancelAt": "60% wind-up (1200ms into slash)",
+        "telegraphsRevealed": 3,
+        "opponentKnows": "You were preparing a slash specifically"
+      },
+      {
+        "cancelAt": "90% wind-up",
+        "telegraphsRevealed": 4,
+        "opponentKnows": "You were almost certainly going to slash - risky feint, very obvious"
+      }
+    ]
+  },
+  "counterplay": {
+    "opponentCanWait": true,
+    "opponentCanCallBluff": true,
+    "riskOfBeingRead": true,
+    "description": "Experienced opponents may wait and not commit to defense, calling your feint and gaining the initiative"
+  },
+  "requirements": {
+    "activeAttackInWindUp": true,
+    "notYetCommitted": true,
+    "goodTiming": true
+  },
+  "metadata": {
+    "weaponTypes": ["any"],
+    "tags": ["special", "deception", "mind-game", "tactical", "feint"],
+    "learningDifficulty": "hard",
+    "notes": "Advanced technique that adds psychological warfare to combat. Effective against defensive players who react early. Risky against patient opponents who wait for commitment. Balance feints with real attacks to keep opponent guessing."
+  },
+  "strategicConsiderations": {
+    "useCase1": "Opponent parries very early - feint to bait and punish",
+    "useCase2": "Opponent is low on stamina - force them to spend resources on defense",
+    "useCase3": "Learning opponent's defensive patterns - feint to reveal their preferred defense",
+    "riskCase1": "Opponent waits - you waste resources",
+    "riskCase2": "Feinting too often - opponent learns pattern and stops falling for it",
+    "riskCase3": "Late feints - reveal too much information about your actual attack"
+  }
+}

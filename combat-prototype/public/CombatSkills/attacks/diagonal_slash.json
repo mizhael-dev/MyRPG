@@ -1,0 +1,90 @@
+{
+  "id": "diagonal_slash",
+  "name": "Diagonal Slash",
+  "description": "An angled cutting attack from high to low. Versatile and harder to predict than horizontal slash.",
+  "type": "attack",
+  "school": "none",
+  "phases": {
+    "windUp": {
+      "duration": 1200,
+      "canCancel": true,
+      "canFeint": true,
+      "description": "Attacker positions weapon at shoulder height, preparing diagonal cut"
+    },
+    "committed": {
+      "duration": 500,
+      "canCancel": false,
+      "canFeint": false,
+      "description": "Weapon cutting on diagonal path, committed to the angle"
+    },
+    "impact": {
+      "tick": 1700,
+      "description": "Blade connects on diagonal trajectory"
+    },
+    "recovery": {
+      "duration": 700,
+      "description": "Following through diagonal motion, returning to guard stance"
+    }
+  },
+  "costs": {
+    "stamina": {
+      "base": 2,
+      "variablePower": {
+        "min": 1,
+        "max": 3,
+        "description": "Can use 50% less (1 stamina) for weaker/slower attack, or 50% more (3 stamina) for stronger/faster attack"
+      }
+    },
+    "mp": 0,
+    "focus": 2,
+    "dailyFatigue": 2
+  },
+  "telegraphs": [
+    {
+      "stage": 1,
+      "bodyPart": "foot",
+      "triggerTime": 180,
+      "visibilityPercent": 20,
+      "description": "Weight shifts diagonally, stance adjusting for angled strike",
+      "possibleSkills": ["diagonal_slash", "slash", "overhead_strike"]
+    },
+    {
+      "stage": 2,
+      "bodyPart": "shoulders",
+      "triggerTime": 550,
+      "visibilityPercent": 45,
+      "description": "Shoulders rotate on diagonal axis, weapon rising to shoulder height",
+      "possibleSkills": ["diagonal_slash", "slash"]
+    },
+    {
+      "stage": 3,
+      "bodyPart": "weapon",
+      "triggerTime": 950,
+      "visibilityPercent": 70,
+      "description": "Weapon positioned at angle, beginning diagonal descent",
+      "possibleSkills": ["diagonal_slash"]
+    },
+    {
+      "stage": 4,
+      "bodyPart": "stance",
+      "triggerTime": 1350,
+      "visibilityPercent": 95,
+      "description": "Full commitment, body weight behind diagonal cut",
+      "possibleSkills": ["diagonal_slash"]
+    }
+  ],
+  "damage": {
+    "type": "slashing",
+    "baseValue": 1,
+    "scaling": {
+      "strength": 1.0,
+      "agility": 0.2
+    },
+    "notes": "In prototype: 1 clean hit = death. Harder to predict direction than horizontal slash."
+  },
+  "metadata": {
+    "weaponTypes": ["sword", "axe"],
+    "tags": ["versatile", "melee", "slashing", "angled"],
+    "learningDifficulty": "medium"
+  }
+}

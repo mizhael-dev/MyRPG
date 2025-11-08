@@ -1,0 +1,94 @@
+{
+  "id": "upward_strike",
+  "name": "Upward Strike",
+  "description": "A fast rising cut from low to high. Breaks guard positions and forces opponent to react quickly.",
+  "type": "attack",
+  "school": "none",
+  "phases": {
+    "windUp": {
+      "duration": 800,
+      "canCancel": true,
+      "canFeint": true,
+      "description": "Attacker lowers weapon and body, preparing to strike upward"
+    },
+    "committed": {
+      "duration": 500,
+      "canCancel": false,
+      "canFeint": false,
+      "description": "Body rising, weapon cutting upward in fast arc"
+    },
+    "impact": {
+      "tick": 1300,
+      "description": "Weapon strikes upward into target"
+    },
+    "recovery": {
+      "duration": 600,
+      "description": "Resetting from high position, bringing weapon back to guard"
+    }
+  },
+  "costs": {
+    "stamina": {
+      "base": 2,
+      "variablePower": {
+        "min": 1,
+        "max": 3,
+        "description": "Can use 50% less (1 stamina) for weaker/slower attack, or 50% more (3 stamina) for explosive rising strike"
+      }
+    },
+    "mp": 0,
+    "focus": 2,
+    "dailyFatigue": 2
+  },
+  "telegraphs": [
+    {
+      "stage": 1,
+      "bodyPart": "foot",
+      "triggerTime": 120,
+      "visibilityPercent": 20,
+      "description": "Knees bend, body lowering subtly",
+      "possibleSkills": ["upward_strike", "thrust"]
+    },
+    {
+      "stage": 2,
+      "bodyPart": "weapon",
+      "triggerTime": 350,
+      "visibilityPercent": 50,
+      "description": "Weapon drops to low position, point angling upward",
+      "possibleSkills": ["upward_strike"]
+    },
+    {
+      "stage": 3,
+      "bodyPart": "shoulders",
+      "triggerTime": 650,
+      "visibilityPercent": 80,
+      "description": "Shoulders begin rotating upward, arms extending",
+      "possibleSkills": ["upward_strike"]
+    },
+    {
+      "stage": 4,
+      "bodyPart": "stance",
+      "triggerTime": 950,
+      "visibilityPercent": 95,
+      "description": "Full commitment, body rising explosively with weapon",
+      "possibleSkills": ["upward_strike"]
+    }
+  ],
+  "damage": {
+    "type": "slashing",
+    "baseValue": 1,
+    "scaling": {
+      "strength": 0.7,
+      "agility": 0.6
+    },
+    "notes": "In prototype: 1 clean hit = death. Fast attack that's hard to defend against due to unusual angle."
+  },
+  "specialProperties": {
+    "breaksGuard": true,
+    "description": "Forces defender's weapon upward, creating opening for follow-up attacks"
+  },
+  "metadata": {
+    "weaponTypes": ["sword", "dagger"],
+    "tags": ["fast", "melee", "slashing", "guard-break"],
+    "learningDifficulty": "medium"
+  }
+}
