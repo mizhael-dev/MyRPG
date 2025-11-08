@@ -30,7 +30,7 @@ export interface PhaseTimings {
     canFeint: boolean;     // Always false
   };
   impact: {
-    tick: number;          // Exact ms when impact occurs
+    duration: number;      // How long impact phase lasts (ms)
   };
   recovery: {
     duration: number;      // How long recovery lasts (ms)
@@ -210,6 +210,7 @@ export interface GameState {
   npc: FighterState;          // Non-player character (opponent)
   pauseState: PauseState;     // Is game paused? Why?
   combatLog: string[];        // Event log for debugging
+  loadedSkills: Map<string, CombatSkill>; // All loaded skills from JSON
 }
 
 // ============================================================================

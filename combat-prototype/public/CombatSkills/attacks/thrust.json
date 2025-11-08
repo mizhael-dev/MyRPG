@@ -6,7 +6,7 @@
   "school": "none",
   "phases": {
     "windUp": {
-      "duration": 1000,
+      "duration": 500,
       "canCancel": true,
       "canFeint": true,
       "description": "Attacker draws weapon back, preparing to thrust forward"
@@ -18,11 +18,11 @@
       "description": "Committed to the thrust, body weight moving forward"
     },
     "impact": {
-      "tick": 1500,
+      "duration": 200,
       "description": "Weapon tip reaches the target"
     },
     "recovery": {
-      "duration": 700,
+      "duration": 400,
       "description": "Pulling back from extended position, resetting stance"
     }
   },

@@ -24,73 +24,67 @@ export function TimelinePanel({ gameState }: TimelinePanelProps) {
     : 0;
 
   return (
-    <div className="bg-gray-800 rounded-lg p-6 space-y-4">
-      <h2 className="text-2xl font-bold mb-4">Combat Timelines</h2>
+    <div className="bg-gray-800 rounded p-4 space-y-2">
+      <h3 className="text-lg font-bold mb-2">Combat Timelines</h3>
 
       {/* Timebar 1: PC Actual */}
-      <div>
-        <div className="text-sm text-gray-400 mb-2">Timebar_PC_actual</div>
-        <div className="h-8 bg-gray-700 rounded overflow-hidden">
+      <div className="flex items-center gap-3">
+        <div className="text-xs text-gray-400 w-32 flex-shrink-0">PC_actual</div>
+        <div className="flex-1 h-5 bg-gray-700 rounded overflow-hidden">
           <div
             className="h-full bg-green-500 transition-all duration-100"
             style={{ width: `${Math.min(pcProgress, 100)}%` }}
           />
         </div>
         {gameState.pc.currentAction && (
-          <div className="text-xs text-gray-400 mt-1">
-            {gameState.pc.currentAction.skill.name} - {gameState.pc.currentAction.currentPhase}
+          <div className="text-xs text-gray-400 w-32 flex-shrink-0">
+            {gameState.pc.currentAction.skill.name}
           </div>
         )}
       </div>
 
       {/* Timebar 2: PC seen by NPC */}
-      <div>
-        <div className="text-sm text-gray-400 mb-2">Timebar_PC_seen_by_NPC</div>
-        <div className="h-8 bg-gray-700 rounded overflow-hidden">
+      <div className="flex items-center gap-3">
+        <div className="text-xs text-gray-400 w-32 flex-shrink-0">PC_seen_by_NPC</div>
+        <div className="flex-1 h-5 bg-gray-700 rounded overflow-hidden">
           <div
             className="h-full bg-green-400 transition-all duration-100"
             style={{ width: `${Math.min(pcProgress, 100)}%` }}
           />
         </div>
-        <div className="text-xs text-gray-500 mt-1">
-          (What opponent sees - includes telegraphs)
-        </div>
       </div>
 
       {/* Timebar 3: NPC Actual */}
-      <div>
-        <div className="text-sm text-gray-400 mb-2">Timebar_NPC_actual</div>
-        <div className="h-8 bg-gray-700 rounded overflow-hidden">
+      <div className="flex items-center gap-3">
+        <div className="text-xs text-gray-400 w-32 flex-shrink-0">NPC_actual</div>
+        <div className="flex-1 h-5 bg-gray-700 rounded overflow-hidden">
           <div
             className="h-full bg-red-500 transition-all duration-100"
             style={{ width: `${Math.min(npcProgress, 100)}%` }}
           />
         </div>
         {gameState.npc.currentAction && (
-          <div className="text-xs text-gray-400 mt-1">
-            {gameState.npc.currentAction.skill.name} - {gameState.npc.currentAction.currentPhase}
+          <div className="text-xs text-gray-400 w-32 flex-shrink-0">
+            {gameState.npc.currentAction.skill.name}
           </div>
         )}
       </div>
 
       {/* Timebar 4: NPC seen by PC */}
-      <div>
-        <div className="text-sm text-gray-400 mb-2">Timebar_NPC_seen_by_PC</div>
-        <div className="h-8 bg-gray-700 rounded overflow-hidden">
+      <div className="flex items-center gap-3">
+        <div className="text-xs text-gray-400 w-32 flex-shrink-0">NPC_seen_by_PC</div>
+        <div className="flex-1 h-5 bg-gray-700 rounded overflow-hidden">
           <div
             className="h-full bg-red-400 transition-all duration-100"
             style={{ width: `${Math.min(npcProgress, 100)}%` }}
           />
         </div>
-        <div className="text-xs text-gray-500 mt-1">
-          (What you see - includes telegraphs)
-        </div>
       </div>
 
       {/* Timebar 5: Combined */}
-      <div>
-        <div className="text-sm text-gray-400 mb-2">Timebar_Combined_actual</div>
-        <div className="h-12 bg-gray-700 rounded relative overflow-hidden">
+      <div className="flex items-center gap-3">
+        <div className="text-xs text-gray-400 w-32 flex-shrink-0">Combined</div>
+        <div className="flex-1 h-6 bg-gray-700 rounded relative overflow-hidden">
           {/* PC bar (green) */}
           <div
             className="absolute top-0 left-0 h-1/2 bg-green-500/50 transition-all duration-100"
@@ -101,9 +95,6 @@ export function TimelinePanel({ gameState }: TimelinePanelProps) {
             className="absolute bottom-0 left-0 h-1/2 bg-red-500/50 transition-all duration-100"
             style={{ width: `${Math.min(npcProgress, 100)}%` }}
           />
-        </div>
-        <div className="text-xs text-gray-500 mt-1">
-          (Both timelines overlaid - shows who acts first)
         </div>
       </div>
     </div>

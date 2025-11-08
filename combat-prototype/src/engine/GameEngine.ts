@@ -217,15 +217,287 @@ export class GameEngine {
   private updateFighter(fighter: FighterState): void {
     // If fighter has an active action, update it
     if (fighter.currentAction) {
-      fighter.currentAction.elapsedTime += this.tickInterval;
+      const action = fighter.currentAction;
+      const prevPhase = action.currentPhase;
 
-      // TODO: Implement action phase progression
-      // TODO: Implement telegraph reveals
-      // TODO: Implement impact resolution
+      action.elapsedTime += this.tickInterval;
+
+      // PHASE PROGRESSION
+      this.updatePhaseProgression(fighter);
+
+      // TELEGRAPH REVEALS
+      this.updateTelegraphReveals(fighter);
+
+      // IMPACT RESOLUTION - trigger once when entering impact phase
+      if (fighter.currentAction && fighter.currentAction.currentPhase === 'impact' && prevPhase !== 'impact') {
+        this.resolveImpact(fighter);
+      }
 
       console.log(
-        `[GameEngine] ${fighter.name} action: ${fighter.currentAction.skill.name} @ ${fighter.currentAction.elapsedTime}ms (${fighter.currentAction.currentPhase})`
+        `[GameEngine] ${fighter.name} action: ${action.skill.name} @ ${action.elapsedTime}ms (${action.currentPhase})`
       );
+    }
+  }
+
+  /**
+   * Update action phase based on elapsed time
+   */
+  private updatePhaseProgression(fighter: FighterState): void {
+    const action = fighter.currentAction;
+    if (!action) return;
+
+    const skill = action.skill;
+    const elapsed = action.elapsedTime;
+    const prevPhase = action.currentPhase;
+
+    // Calculate cumulative phase boundaries from durations
+    const windUpEnd = skill.phases.windUp.duration;
+    const committedEnd = windUpEnd + skill.phases.committed.duration;
+    const impactEnd = committedEnd + skill.phases.impact.duration;
+    const recoveryEnd = impactEnd + skill.phases.recovery.duration;
+
+    // Determine current phase
+    let newPhase: typeof action.currentPhase = action.currentPhase;
+
+    if (elapsed < windUpEnd) {
+      newPhase = 'windUp';
+      action.canCancel = skill.phases.windUp.canCancel;
+      action.canFeint = skill.phases.windUp.canFeint;
+    } else if (elapsed < committedEnd) {
+      newPhase = 'committed';
+      action.canCancel = false;
+      action.canFeint = false;
+    } else if (elapsed < impactEnd) {
+      newPhase = 'impact';
+      action.canCancel = false;
+      action.canFeint = false;
+    } else if (elapsed < recoveryEnd) {
+      newPhase = 'recovery';
+      action.canCancel = false;
+      action.canFeint = false;
+    } else {
+      // Action complete, clear it
+      this.log(`${fighter.name} completed ${skill.name}`);
+      fighter.currentAction = null;
+      return;
+    }
+
+    // Update phase and emit event if changed
+    if (newPhase !== prevPhase) {
+      action.currentPhase = newPhase;
+      this.log(`${fighter.name} ${skill.name}: ${prevPhase} → ${newPhase}`);
+
+      this.emitEvent({
+        type: 'PHASE_CHANGED',
+        fighterId: fighter.id,
+        newPhase,
+      });
+    }
+  }
+
+  /**
+   * Check for new telegraph reveals
+   */
+  private updateTelegraphReveals(fighter: FighterState): void {
+    const action = fighter.currentAction;
+    if (!action) return;
+
+    const skill = action.skill;
+    const elapsed = action.elapsedTime;
+
+    // Check each telegraph
+    for (const telegraph of skill.telegraphs) {
+      // If elapsed time has reached trigger time and not already visible
+      if (elapsed >= telegraph.triggerTime) {
+        const alreadyVisible = action.visibleTelegraphs.some(
+          (t) => t.stage === telegraph.stage
+        );
+
+        if (!alreadyVisible) {
+          action.visibleTelegraphs.push(telegraph);
+
+          this.log(
+            `${fighter.name} telegraph ${telegraph.stage}: ${telegraph.description} (${telegraph.visibilityPercent}%)`
+          );
+
+          this.emitEvent({
+            type: 'TELEGRAPH_REVEALED',
+            telegraph,
+            fighterId: fighter.id,
+          });
+
+          // Trigger auto-pause for new telegraph
+          this.checkAutoPause(fighter, 'new_telegraph', telegraph);
+        }
+      }
+    }
+  }
+
+  /**
+   * Resolve impact when attack reaches Impact tick
+   */
+  private resolveImpact(attacker: FighterState): void {
+    const action = attacker.currentAction;
+    if (!action || action.skill.type !== 'attack') return;
+
+    // Identify defender
+    const defender = attacker.id === 'pc' ? this.npc : this.pc;
+
+    this.log(`${attacker.name} ${action.skill.name} Impact!`);
+
+    // Check if defender has active defense
+    const defenseActive = this.isDefenseActive(defender, action.elapsedTime);
+
+    if (defenseActive) {
+      // Defense successful - parry/dodge worked
+      this.log(`${defender.name} defense successful!`);
+
+      // Blocked hit still counts toward defender's 3-hit death counter
+      defender.hitsTaken += 1;
+
+      // Apply parry stamina cost if applicable
+      if (defender.currentAction?.skill.id === 'parry') {
+        const attackerStaminaSpent = action.skill.costs.stamina.base;
+        const additionalCost = attackerStaminaSpent * 0.25;
+        defender.resources.stamina -= additionalCost;
+        this.log(`${defender.name} parry cost: ${additionalCost.toFixed(1)} stamina`);
+      }
+
+      this.emitEvent({
+        type: 'IMPACT_RESOLVED',
+        attacker: attacker.id,
+        defender: defender.id,
+        hit: false,
+      });
+
+      // Check if 3 blocked hits = death
+      this.checkDeath(defender, 'blocked_hit');
+    } else {
+      // Clean hit - no defense
+      this.log(`${attacker.name} clean hit on ${defender.name}!`);
+
+      // In prototype: 1 clean hit = instant death
+      defender.resources.hp = 0;
+      defender.hitsTaken += 1;
+
+      this.emitEvent({
+        type: 'IMPACT_RESOLVED',
+        attacker: attacker.id,
+        defender: defender.id,
+        hit: true,
+      });
+
+      // Check for death
+      this.checkDeath(defender, 'clean_hit');
+    }
+  }
+
+  /**
+   * Check if defender has active defense during attacker's impact
+   */
+  private isDefenseActive(defender: FighterState, attackImpactTime: number): boolean {
+    const defenseAction = defender.currentAction;
+    if (!defenseAction || defenseAction.skill.type !== 'defense') {
+      return false;
+    }
+
+    const skill = defenseAction.skill;
+
+    // For parry: check if in readiness window
+    if (skill.id === 'parry') {
+      // Read parry readinessWindow values from JSON
+      // @ts-ignore - readinessWindow not in PhaseTimings type
+      const readinessStart = skill.phases.readinessWindow?.startTick || 500;
+      // @ts-ignore
+      const readinessDuration = skill.phases.readinessWindow?.baseDuration || 400;
+      const defenseElapsed = defenseAction.elapsedTime;
+
+      // Defense is active if elapsed time is within readiness window
+      const inReadiness =
+        defenseElapsed >= readinessStart &&
+        defenseElapsed <= readinessStart + readinessDuration;
+
+      this.log(
+        `Parry check: elapsed=${defenseElapsed}ms, window=${readinessStart}-${readinessStart + readinessDuration}ms, active=${inReadiness}`
+      );
+
+      return inReadiness;
+    }
+
+    // TODO: Handle other defense types (dodge, etc.)
+    return false;
+  }
+
+  /**
+   * Check if fighter should die
+   */
+  private checkDeath(fighter: FighterState, reason: string): void {
+    let shouldDie = false;
+    let deathReason = '';
+
+    // Check HP
+    if (fighter.resources.hp <= 0) {
+      shouldDie = true;
+      deathReason = reason === 'clean_hit' ? 'Clean hit - instant death' : 'HP depleted';
+    }
+    // Check 3-hit death
+    else if (fighter.hitsTaken >= 3) {
+      shouldDie = true;
+      deathReason = '3 hits taken - death';
+      fighter.resources.hp = 0;
+    }
+
+    if (shouldDie) {
+      this.log(`${fighter.name} died: ${deathReason}`);
+
+      // Clear current action
+      fighter.currentAction = null;
+
+      this.emitEvent({
+        type: 'FIGHTER_DIED',
+        fighterId: fighter.id,
+        reason: deathReason,
+      });
+
+      // Pause combat
+      this.pauseState.isPaused = true;
+      this.pauseState.reason = 'manual'; // Use manual as placeholder
+      this.log('Combat ended');
+    }
+  }
+
+  /**
+   * Check if combat should auto-pause
+   */
+  private checkAutoPause(
+    fighter: FighterState,
+    reason: 'new_telegraph' | 'possibleSkills_changed',
+    telegraph?: any
+  ): void {
+    // For now, auto-pause on every new telegraph
+    // TODO: More sophisticated pause logic (check if possibleSkills actually changed)
+
+    if (reason === 'new_telegraph' && telegraph) {
+      this.pauseState.isPaused = true;
+      this.pauseState.reason = 'new_telegraph';
+      this.pauseState.availableActions = ['slash', 'thrust', 'parry']; // TODO: Calculate based on time available
+
+      // Build prediction
+      this.pauseState.prediction = {
+        possibleSkills: telegraph.possibleSkills || [],
+        confidence: telegraph.visibilityPercent || 0,
+        estimatedImpactRange: {
+          min: 1000, // TODO: Calculate from possible skills
+          max: 2500,
+        },
+      };
+
+      this.log(`Auto-pause: ${reason} (${telegraph.description})`);
+
+      this.emitEvent({
+        type: 'PAUSE_TRIGGERED',
+        pauseState: this.pauseState,
+      });
     }
   }
 
@@ -253,6 +525,66 @@ export class GameEngine {
     if (fighter.currentAction) {
       console.warn(`[GameEngine] ${fighter.name} already has active action`);
       return;
+    }
+
+    // RESOURCE CONSUMPTION - Deduct costs when action starts
+    const costs = skill.costs;
+    const staminaCost = costs.stamina.base;
+    const mpCost = costs.mp;
+    const focusCost = costs.focus;
+    const dailyFatigueCost = costs.dailyFatigue;
+
+    // Deduct resources
+    fighter.resources.stamina -= staminaCost;
+    fighter.resources.mp -= mpCost;
+    fighter.resources.focus -= focusCost;
+    fighter.resources.dailyFatigue -= dailyFatigueCost;
+
+    this.log(
+      `${fighter.name} spent: ${staminaCost} stam, ${mpCost} MP, ${focusCost} focus, ${dailyFatigueCost} fatigue`
+    );
+
+    // Handle exhaustion penalties
+    let hpDrain = 0;
+
+    if (fighter.resources.stamina < 0) {
+      // 1 HP per 2 stamina deficit
+      const deficit = Math.abs(fighter.resources.stamina);
+      hpDrain += deficit / 2;
+      this.log(`${fighter.name} exhausted (stamina): -${(deficit / 2).toFixed(1)} HP`);
+    }
+
+    if (fighter.resources.mp < 0) {
+      // 1 HP per 1 MP deficit
+      const deficit = Math.abs(fighter.resources.mp);
+      hpDrain += deficit;
+      this.log(`${fighter.name} exhausted (MP): -${deficit.toFixed(1)} HP`);
+    }
+
+    if (fighter.resources.focus < 0) {
+      // 1 HP per 2 focus deficit
+      const deficit = Math.abs(fighter.resources.focus);
+      hpDrain += deficit / 2;
+      this.log(`${fighter.name} exhausted (focus): -${(deficit / 2).toFixed(1)} HP`);
+    }
+
+    if (fighter.resources.dailyFatigue < 0) {
+      // 1 HP per 5 daily fatigue deficit
+      const deficit = Math.abs(fighter.resources.dailyFatigue);
+      hpDrain += deficit / 5;
+      this.log(`${fighter.name} exhausted (fatigue): -${(deficit / 5).toFixed(1)} HP`);
+    }
+
+    // Apply HP drain from exhaustion
+    if (hpDrain > 0) {
+      fighter.resources.hp -= hpDrain;
+      this.log(`${fighter.name} HP drained: -${hpDrain.toFixed(1)} (exhaustion penalty)`);
+
+      // Check if fighter died from exhaustion
+      if (fighter.resources.hp <= 0) {
+        this.checkDeath(fighter, 'exhaustion');
+        return; // Don't create action if fighter died
+      }
     }
 
     // Create new action
@@ -334,6 +666,7 @@ export class GameEngine {
       npc: this.npc,
       pauseState: this.pauseState,
       combatLog: [...this.combatLog], // Copy array
+      loadedSkills: this.skills, // Expose loaded skills to UI
     };
 
     this.emitEvent({
@@ -369,6 +702,7 @@ export class GameEngine {
       npc: this.npc,
       pauseState: this.pauseState,
       combatLog: [...this.combatLog],
+      loadedSkills: this.skills,
     };
   }
 }

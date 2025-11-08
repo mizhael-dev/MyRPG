@@ -62,121 +62,125 @@ export function CombatScene() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <header className="flex justify-between items-center">
-          <h1 className="text-4xl font-bold">MyRPG - Combat Prototype</h1>
-          <div className="flex gap-4">
-            <button
-              onClick={() => engine.togglePause()}
-              className="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 rounded-lg font-semibold transition-colors"
-            >
-              {gameState.pauseState.isPaused ? '▶ Resume' : '⏸ Pause'}
-            </button>
-          </div>
-        </header>
-
-        {/* Current Tick Display */}
-        <div className="bg-gray-800 rounded-lg p-4">
-          <div className="text-xl">
-            <span className="text-gray-400">Current Tick:</span>{' '}
+    <div className="min-h-screen bg-gray-900 text-white p-4">
+      {/* Top Bar: Tick Counter (left) and Pause Button (right) */}
+      <div className="flex justify-between items-center mb-4">
+        {/* Current Tick - max 1/5 width */}
+        <div className="bg-gray-800 rounded px-3 py-2" style={{ maxWidth: '20%' }}>
+          <div className="text-sm">
+            <span className="text-gray-400">Tick:</span>{' '}
             <span className="font-mono text-green-400">{gameState.currentTick}ms</span>
           </div>
         </div>
 
-        {/* Timeline Visualization */}
-        <TimelinePanel gameState={gameState} />
+        {/* Pause Button */}
+        <button
+          onClick={() => engine.togglePause()}
+          className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded font-semibold transition-colors text-sm"
+        >
+          {gameState.pauseState.isPaused ? '▶ Resume' : '⏸ Pause'}
+        </button>
+      </div>
 
-        {/* Action Buttons */}
-        <ActionPanel
-          gameState={gameState}
-          onExecuteSkill={(skillId) => engine.executeSkill('pc', skillId)}
-        />
+      {/* Main Layout: Left Content + Right Sidebar */}
+      <div className="flex gap-4">
+        {/* Left Column: Main Content */}
+        <div className="flex-1 space-y-4">
+          {/* Timeline Visualization */}
+          <TimelinePanel gameState={gameState} />
 
-        {/* Combat Log */}
-        <div className="bg-gray-800 rounded-lg p-6">
-          <h2 className="text-2xl font-bold mb-4">Combat Log</h2>
-          <div className="space-y-1 font-mono text-sm max-h-64 overflow-y-auto">
-            {gameState.combatLog.map((entry, i) => (
-              <div key={i} className="text-gray-300">
-                {entry}
+          {/* Combat Log */}
+          <div className="bg-gray-800 rounded p-4">
+            <h3 className="text-lg font-bold mb-2">Combat Log</h3>
+            <div className="space-y-1 font-mono text-xs max-h-40 overflow-y-auto">
+              {gameState.combatLog.slice().reverse().map((entry, i) => (
+                <div key={i} className="text-gray-300">
+                  {entry}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Fighter States */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Player Character */}
+            <div className="bg-gray-800 rounded p-4">
+              <h3 className="text-lg font-bold mb-2">Player</h3>
+              <div className="space-y-1 text-xs">
+                <div>
+                  <span className="text-gray-400">HP:</span> {gameState.pc.resources.hp} /{' '}
+                  {gameState.pc.maxResources.maxHp}
+                </div>
+                <div>
+                  <span className="text-gray-400">Stamina:</span> {gameState.pc.resources.stamina} /{' '}
+                  {gameState.pc.maxResources.maxStamina}
+                </div>
+                <div>
+                  <span className="text-gray-400">Focus:</span> {gameState.pc.resources.focus} /{' '}
+                  {gameState.pc.maxResources.maxFocus}
+                </div>
+                <div>
+                  <span className="text-gray-400">Hits:</span> {gameState.pc.hitsTaken} / 3
+                </div>
+                {gameState.pc.currentAction && (
+                  <div className="mt-2 p-2 bg-green-900/30 rounded">
+                    <div className="font-bold text-green-400 text-xs">
+                      {gameState.pc.currentAction.skill.name}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {gameState.pc.currentAction.currentPhase} • {gameState.pc.currentAction.elapsedTime}ms
+                    </div>
+                  </div>
+                )}
               </div>
-            ))}
+            </div>
+
+            {/* Opponent */}
+            <div className="bg-gray-800 rounded p-4">
+              <h3 className="text-lg font-bold mb-2">Opponent</h3>
+              <div className="space-y-1 text-xs">
+                <div>
+                  <span className="text-gray-400">HP:</span> {gameState.npc.resources.hp} /{' '}
+                  {gameState.npc.maxResources.maxHp}
+                </div>
+                <div>
+                  <span className="text-gray-400">Stamina:</span> {gameState.npc.resources.stamina} /{' '}
+                  {gameState.npc.maxResources.maxStamina}
+                </div>
+                <div>
+                  <span className="text-gray-400">Focus:</span> {gameState.npc.resources.focus} /{' '}
+                  {gameState.npc.maxResources.maxFocus}
+                </div>
+                <div>
+                  <span className="text-gray-400">Hits:</span> {gameState.npc.hitsTaken} / 3
+                </div>
+                {gameState.npc.currentAction && (
+                  <div className="mt-2 p-2 bg-red-900/30 rounded">
+                    <div className="font-bold text-red-400 text-xs">
+                      {gameState.npc.currentAction.skill.name}
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      {gameState.npc.currentAction.currentPhase} • {gameState.npc.currentAction.elapsedTime}ms
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Fighter States (Debug Info) */}
-        <div className="grid grid-cols-2 gap-6">
-          {/* Player Character */}
-          <div className="bg-gray-800 rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-4">Player Character</h2>
-            <div className="space-y-2 text-sm">
-              <div>
-                <span className="text-gray-400">HP:</span> {gameState.pc.resources.hp} /{' '}
-                {gameState.pc.maxResources.maxHp}
-              </div>
-              <div>
-                <span className="text-gray-400">Stamina:</span> {gameState.pc.resources.stamina} /{' '}
-                {gameState.pc.maxResources.maxStamina}
-              </div>
-              <div>
-                <span className="text-gray-400">Focus:</span> {gameState.pc.resources.focus} /{' '}
-                {gameState.pc.maxResources.maxFocus}
-              </div>
-              <div>
-                <span className="text-gray-400">Hits Taken:</span> {gameState.pc.hitsTaken} / 3
-              </div>
-              {gameState.pc.currentAction && (
-                <div className="mt-4 p-3 bg-green-900/30 rounded">
-                  <div className="font-bold text-green-400">
-                    {gameState.pc.currentAction.skill.name}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    Phase: {gameState.pc.currentAction.currentPhase}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    Elapsed: {gameState.pc.currentAction.elapsedTime}ms
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Opponent */}
-          <div className="bg-gray-800 rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-4">Opponent</h2>
-            <div className="space-y-2 text-sm">
-              <div>
-                <span className="text-gray-400">HP:</span> {gameState.npc.resources.hp} /{' '}
-                {gameState.npc.maxResources.maxHp}
-              </div>
-              <div>
-                <span className="text-gray-400">Stamina:</span> {gameState.npc.resources.stamina} /{' '}
-                {gameState.npc.maxResources.maxStamina}
-              </div>
-              <div>
-                <span className="text-gray-400">Focus:</span> {gameState.npc.resources.focus} /{' '}
-                {gameState.npc.maxResources.maxFocus}
-              </div>
-              <div>
-                <span className="text-gray-400">Hits Taken:</span> {gameState.npc.hitsTaken} / 3
-              </div>
-              {gameState.npc.currentAction && (
-                <div className="mt-4 p-3 bg-red-900/30 rounded">
-                  <div className="font-bold text-red-400">
-                    {gameState.npc.currentAction.skill.name}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    Phase: {gameState.npc.currentAction.currentPhase}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    Elapsed: {gameState.npc.currentAction.elapsedTime}ms
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+        {/* Right Sidebar: Action Panel */}
+        <div className="w-64">
+          <ActionPanel
+            gameState={gameState}
+            onExecuteSkillPC={(skillId) => engine.executeSkill('pc', skillId)}
+            onExecuteSkillNPC={(skillId) => engine.executeSkill('npc', skillId)}
+            onWait={() => {
+              if (gameState.pauseState.isPaused) {
+                engine.togglePause();
+              }
+            }}
+          />
         </div>
       </div>
     </div>
