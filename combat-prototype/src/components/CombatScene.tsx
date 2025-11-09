@@ -82,9 +82,23 @@ export function CombatScene() {
         </button>
       </div>
 
-      {/* Main Layout: Left Content + Right Sidebar */}
+      {/* Main Layout: Left Sidebar + Center Content + Right Sidebar */}
       <div className="flex gap-4">
-        {/* Left Column: Main Content */}
+        {/* Left Sidebar: PC Actions */}
+        <div className="w-64">
+          <ActionPanel
+            gameState={gameState}
+            fighter="pc"
+            onExecuteSkill={(skillId) => engine.executeSkill('pc', skillId)}
+            onWait={() => {
+              if (gameState.pauseState.isPaused) {
+                engine.togglePause();
+              }
+            }}
+          />
+        </div>
+
+        {/* Center Column: Main Content */}
         <div className="flex-1 space-y-4">
           {/* Timeline Visualization */}
           <TimelinePanel gameState={gameState} />
@@ -169,12 +183,12 @@ export function CombatScene() {
           </div>
         </div>
 
-        {/* Right Sidebar: Action Panel */}
+        {/* Right Sidebar: NPC Actions */}
         <div className="w-64">
           <ActionPanel
             gameState={gameState}
-            onExecuteSkillPC={(skillId) => engine.executeSkill('pc', skillId)}
-            onExecuteSkillNPC={(skillId) => engine.executeSkill('npc', skillId)}
+            fighter="npc"
+            onExecuteSkill={(skillId) => engine.executeSkill('npc', skillId)}
             onWait={() => {
               if (gameState.pauseState.isPaused) {
                 engine.togglePause();
