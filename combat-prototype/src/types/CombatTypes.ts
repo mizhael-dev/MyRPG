@@ -30,7 +30,7 @@ export interface PhaseTimings {
     canFeint: boolean;     // Always false
   };
   impact: {
-    duration: number;      // How long impact phase lasts (ms)
+    tick: number;          // Exact ms when impact occurs
   };
   recovery: {
     duration: number;      // How long recovery lasts (ms)
@@ -146,7 +146,7 @@ export interface FighterState {
   maxResources: MaxResources;
   currentAction: ActionState | null;  // What they're doing right now
   availableSkills: string[];          // Skill IDs they can use
-  hitsTaken: number;                  // For 3-hit death tracking
+  hitsRemaining: number;              // Hits remaining (starts at 3, clean hit = 0, non-clean = -1)
 }
 
 // ============================================================================

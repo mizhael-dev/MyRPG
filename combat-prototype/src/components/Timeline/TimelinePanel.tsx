@@ -30,17 +30,17 @@ export function TimelinePanel({ gameState }: TimelinePanelProps) {
       {/* Timebar 1: PC Actual */}
       <div className="flex items-center gap-3">
         <div className="text-xs text-gray-400 w-32 flex-shrink-0">PC_actual</div>
-        <div className="flex-1 h-5 bg-gray-700 rounded overflow-hidden">
+        <div className="flex-1 h-5 bg-gray-700 rounded overflow-hidden relative">
           <div
             className="h-full bg-green-500 transition-all duration-100"
             style={{ width: `${Math.min(pcProgress, 100)}%` }}
           />
+          {gameState.pc.currentAction && (
+            <div className="absolute inset-0 flex items-center pl-2 text-xs text-white font-semibold pointer-events-none">
+              {gameState.pc.currentAction.skill.name}
+            </div>
+          )}
         </div>
-        {gameState.pc.currentAction && (
-          <div className="text-xs text-gray-400 w-32 flex-shrink-0">
-            {gameState.pc.currentAction.skill.name}
-          </div>
-        )}
       </div>
 
       {/* Timebar 2: PC seen by NPC */}
@@ -57,17 +57,17 @@ export function TimelinePanel({ gameState }: TimelinePanelProps) {
       {/* Timebar 3: NPC Actual */}
       <div className="flex items-center gap-3">
         <div className="text-xs text-gray-400 w-32 flex-shrink-0">NPC_actual</div>
-        <div className="flex-1 h-5 bg-gray-700 rounded overflow-hidden">
+        <div className="flex-1 h-5 bg-gray-700 rounded overflow-hidden relative">
           <div
             className="h-full bg-red-500 transition-all duration-100"
             style={{ width: `${Math.min(npcProgress, 100)}%` }}
           />
+          {gameState.npc.currentAction && (
+            <div className="absolute inset-0 flex items-center pl-2 text-xs text-white font-semibold pointer-events-none">
+              {gameState.npc.currentAction.skill.name}
+            </div>
+          )}
         </div>
-        {gameState.npc.currentAction && (
-          <div className="text-xs text-gray-400 w-32 flex-shrink-0">
-            {gameState.npc.currentAction.skill.name}
-          </div>
-        )}
       </div>
 
       {/* Timebar 4: NPC seen by PC */}

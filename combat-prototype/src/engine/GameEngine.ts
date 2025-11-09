@@ -96,7 +96,7 @@ export class GameEngine {
       },
       currentAction: null,
       availableSkills: ['slash', 'thrust', 'parry'], // Default skills
-      hitsTaken: 0, // For 3-hit death tracking
+      hitsRemaining: 3, // Starts with 3 hits, clean hit = instant death (0), non-clean = -1
     };
   }
 
@@ -250,11 +250,10 @@ export class GameEngine {
     const elapsed = action.elapsedTime;
     const prevPhase = action.currentPhase;
 
-    // Calculate cumulative phase boundaries from durations
+    // Calculate phase boundaries
     const windUpEnd = skill.phases.windUp.duration;
-    const committedEnd = windUpEnd + skill.phases.committed.duration;
-    const impactEnd = committedEnd + skill.phases.impact.duration;
-    const recoveryEnd = impactEnd + skill.phases.recovery.duration;
+    const impactTick = skill.phases.impact.tick;
+    const recoveryEnd = impactTick + skill.phases.recovery.duration;
 
     // Determine current phase
     let newPhase: typeof action.currentPhase = action.currentPhase;
@@ -263,11 +262,11 @@ export class GameEngine {
       newPhase = 'windUp';
       action.canCancel = skill.phases.windUp.canCancel;
       action.canFeint = skill.phases.windUp.canFeint;
-    } else if (elapsed < committedEnd) {
+    } else if (elapsed < impactTick) {
       newPhase = 'committed';
       action.canCancel = false;
       action.canFeint = false;
-    } else if (elapsed < impactEnd) {
+    } else if (elapsed === impactTick) {
       newPhase = 'impact';
       action.canCancel = false;
       action.canFeint = false;
@@ -349,11 +348,8 @@ export class GameEngine {
     const defenseActive = this.isDefenseActive(defender, action.elapsedTime);
 
     if (defenseActive) {
-      // Defense successful - parry/dodge worked
-      this.log(`${defender.name} defense successful!`);
-
-      // Blocked hit still counts toward defender's 3-hit death counter
-      defender.hitsTaken += 1;
+      // Perfect block - no damage, no hit counted
+      this.log(`${defender.name} blocked the attack!`);
 
       // Apply parry stamina cost if applicable
       if (defender.currentAction?.skill.id === 'parry') {
@@ -369,16 +365,12 @@ export class GameEngine {
         defender: defender.id,
         hit: false,
       });
-
-      // Check if 3 blocked hits = death
-      this.checkDeath(defender, 'blocked_hit');
     } else {
-      // Clean hit - no defense
-      this.log(`${attacker.name} clean hit on ${defender.name}!`);
+      // Clean hit - no defense active
+      this.log(`${attacker.name} CLEAN HIT on ${defender.name}!`);
 
-      // In prototype: 1 clean hit = instant death
-      defender.resources.hp = 0;
-      defender.hitsTaken += 1;
+      // Clean strike: instant death (3 → 0)
+      defender.hitsRemaining = 0;
 
       this.emitEvent({
         type: 'IMPACT_RESOLVED',
@@ -435,16 +427,18 @@ export class GameEngine {
     let shouldDie = false;
     let deathReason = '';
 
-    // Check HP
-    if (fighter.resources.hp <= 0) {
+    // Check hits remaining
+    if (fighter.hitsRemaining <= 0) {
       shouldDie = true;
-      deathReason = reason === 'clean_hit' ? 'Clean hit - instant death' : 'HP depleted';
+      deathReason = reason === 'clean_hit'
+        ? 'Clean strike - instant death'
+        : `No hits remaining (${3 - fighter.hitsRemaining} hits taken)`;
     }
-    // Check 3-hit death
-    else if (fighter.hitsTaken >= 3) {
+    // Check HP (from exhaustion, etc.)
+    else if (fighter.resources.hp <= 0) {
       shouldDie = true;
-      deathReason = '3 hits taken - death';
-      fighter.resources.hp = 0;
+      deathReason = 'HP depleted';
+      fighter.hitsRemaining = 0;
     }
 
     if (shouldDie) {

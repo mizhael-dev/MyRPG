@@ -29,14 +29,13 @@ export function ActionPanel({ gameState, onExecuteSkillPC, onExecuteSkillNPC, on
     let impactText = '';
 
     if (skill.type === 'attack') {
-      // Calculate cumulative times from durations
+      // Calculate phase boundaries using tick for impact
       const windUpEnd = phases.windUp.duration;
-      const committedEnd = windUpEnd + phases.committed.duration;
-      const impactEnd = committedEnd + phases.impact.duration;
-      const recoveryEnd = impactEnd + phases.recovery.duration;
+      const impactTick = phases.impact.tick;
+      const recoveryEnd = impactTick + phases.recovery.duration;
 
-      impactText = `Impact: ${committedEnd}-${impactEnd}ms`;
-      timingText = `Wind: 0-${windUpEnd} · Commit: ${windUpEnd}-${committedEnd} · Impact: ${committedEnd}-${impactEnd} · Recov: ${impactEnd}-${recoveryEnd}`;
+      impactText = `Impact: ${impactTick}ms`;
+      timingText = `Wind: 0-${windUpEnd} · Commit: ${windUpEnd}-${impactTick} · Recov: ${impactTick}-${recoveryEnd}`;
     } else if (skill.type === 'defense' && skillId === 'parry') {
       // Parry has readinessWindow instead of standard phases
       const windUpEnd = phases.windUp.duration;

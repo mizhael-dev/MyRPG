@@ -18,7 +18,7 @@
       "description": "Committed to the attack, weapon in motion, cannot be cancelled"
     },
     "impact": {
-      "duration": 200,
+      "tick": 2000,
       "description": "The blade connects with the target"
     },
     "recovery": {

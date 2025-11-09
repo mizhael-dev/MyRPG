@@ -18,7 +18,7 @@
       "description": "Committed to the thrust, body weight moving forward"
     },
     "impact": {
-      "duration": 200,
+      "tick": 1000,
       "description": "Weapon tip reaches the target"
     },
     "recovery": {

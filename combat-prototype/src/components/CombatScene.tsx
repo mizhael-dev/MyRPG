@@ -92,7 +92,7 @@ export function CombatScene() {
           {/* Combat Log */}
           <div className="bg-gray-800 rounded p-4">
             <h3 className="text-lg font-bold mb-2">Combat Log</h3>
-            <div className="space-y-1 font-mono text-xs max-h-40 overflow-y-auto">
+            <div className="space-y-1 font-mono text-sm max-h-40 overflow-y-auto">
               {gameState.combatLog.slice().reverse().map((entry, i) => (
                 <div key={i} className="text-gray-300">
                   {entry}
@@ -120,7 +120,7 @@ export function CombatScene() {
                   {gameState.pc.maxResources.maxFocus}
                 </div>
                 <div>
-                  <span className="text-gray-400">Hits:</span> {gameState.pc.hitsTaken} / 3
+                  <span className="text-gray-400">Hits:</span> {gameState.pc.hitsRemaining} / 3
                 </div>
                 {gameState.pc.currentAction && (
                   <div className="mt-2 p-2 bg-green-900/30 rounded">
@@ -152,7 +152,7 @@ export function CombatScene() {
                   {gameState.npc.maxResources.maxFocus}
                 </div>
                 <div>
-                  <span className="text-gray-400">Hits:</span> {gameState.npc.hitsTaken} / 3
+                  <span className="text-gray-400">Hits:</span> {gameState.npc.hitsRemaining} / 3
                 </div>
                 {gameState.npc.currentAction && (
                   <div className="mt-2 p-2 bg-red-900/30 rounded">
