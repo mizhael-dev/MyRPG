@@ -6,7 +6,8 @@ This folder contains the **source of truth** for all combat skills in the game.
 
 1. **Edit the CSV** (skills as columns for easy comparison):
    - `/attacks/CombatSkills-attack.csv` - Attack skills
-   - `/defense/CombatSkills-defense.csv` - Defense skills (future)
+   - `/defense/CombatSkills-defense.csv` - Defense skills
+   - `/special/CombatSkills-special.csv` - Special skills (feint, etc.)
 
 2. **Rebuild JSON files**:
    ```bash
@@ -44,7 +45,7 @@ windUp_duration,400,500,200
 ### What Gets Auto-Generated
 
 You **don't need** to include these in CSV (build script adds them):
-- `type: "attack"` - Always "attack" for attack skills
+- `type: "attack"`, `"defense"`, or `"special"` - Based on which CSV file
 - `school: "none"` - Default value
 - `stage` numbers in telegraphs - Derived from `t1_`, `t2_`, etc.
 
@@ -182,6 +183,102 @@ dailyFatigue_base,2,2,2
 - `low` - Rising attacks from below
 - `diagonal` - Angled attacks
 
+### Defense Skills Structure
+
+Defense skills have different required rows:
+
+```csv
+id,emergency_defense,retreat,parry,deflection
+name,Emergency Defense,Retreat,Parry,Deflection
+description,Text description,...
+
+# Phase Timings
+windUp_duration,100,200,300,300
+active_duration,200,400,500,500
+recovery_duration,500,300,200,200
+
+# Telegraph Stages (optional but recommended)
+t1_triggerTime,0,0,0,0
+t1_assetId,eyes_widen,weight_shift_back,eyes_lock_blade,eyes_lock_blade
+t1_bodyPart,eyes,foot,eyes,eyes
+t1_description,Eyes widen suddenly,Weight shifts to back foot,...
+t1_pause,true,true,true,true
+# (t2_, t3_, t4_ follow same pattern as attacks)
+
+# Defense Properties
+requiresLine,false,false,true,false
+requiresAttackId,false,false,false,true
+defenseType,emergency,movement,deflection,deflection
+damageReduction,0.5,1.0,1.0,1.0
+counterSpeedBonus,0,0,100,300
+
+# Metadata & Resources (same as attacks)
+```
+
+**Key differences from attacks:**
+- `active_duration` instead of `committed_duration` (use `N/A` for instant defenses)
+- No `impact_tick` (defense timing is based on active window)
+- No `line` field (only attacks have line direction)
+- **Telegraphs optional** but recommended to show defender's intent to attacker
+- Defense-specific properties: `requiresLine`, `requiresAttackId`, `defenseType`, `damageReduction`, `counterSpeedBonus`
+
+**Defense Types:**
+- `emergency` - Last resort, can be used late, reduced damage
+- `movement` - Movement-based defense (dodge, retreat)
+- `deflection` - Blade-based defense (parry, deflection)
+
+### Special Skills Structure
+
+Special skills have unique mechanics (feint, morph, etc.):
+
+```csv
+id,feint
+name,Feint (Attack Morph)
+description,Change attack mid-motion after reading defender's telegraph...
+
+# Special Mechanics
+specialType,attack_morph
+requiresActiveAttack,true
+requiresDefenderTelegraph,true
+requiresDifferentLine,true
+availableInPhase,windUp
+cannotUseAfter,committed
+
+# Timing Mechanics (ms)
+recognitionTime,0
+adjustmentTime,100
+timePenalty,100
+morphDescription,Reading defender's telegraph then adjusting attack angle
+
+# Execution Flow
+executionFlow,1_Read defender telegraph|2_Cancel current attack|3_Apply penalty|4_Start new attack|5_Continue
+resetBehavior,reset_to_zero_plus_penalty
+newAttackStartTime,100
+
+# Stamina Mechanics
+staminaMultiplier,1.4
+staminaDescription,Costs base attack stamina * 1.4 (40% penalty)
+originalAttackStaminaLost,true
+
+# Success/Failure Conditions
+onSuccessfulRead,New attack bypasses defender's prepared defense line
+onMisread,Morphed attack telegraphs revealed defender adapts
+
+# Telegraph Stages (same format as attacks/defenses)
+# Tactical Properties, Requirements, Metadata, Resources...
+```
+
+**Key features of special skills:**
+- Unique mechanics tied to game state (active attacks, defender telegraphs)
+- Complex execution flow with multiple steps
+- Timing penalties and stamina multipliers
+- Success/failure conditions based on tactical reads
+- Telegraphs show the special action in progress
+
+**Special Types:**
+- `attack_morph` - Change attack mid-motion (feint)
+- Additional special types can be added for other tactical actions
+
 ### Array Values
 
 Use `|` separator for arrays:
@@ -278,9 +375,9 @@ The build script checks:
 
 ## Next Steps
 
-- [ ] Add defense skills CSV
+- [x] Add defense skills CSV
 - [ ] Create telegraph assets (replace placeholders)
-- [ ] Add more attack skills
+- [ ] Add more attack and defense skills
 - [ ] Implement combo system
 
 For questions, see `/scripts/buildSkills.cjs` - it's heavily commented.

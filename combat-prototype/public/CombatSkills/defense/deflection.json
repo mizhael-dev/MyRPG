@@ -1,7 +1,7 @@
 {
-  "id": "parry",
-  "name": "Parry",
-  "description": "Intercept attack with blade on correct line. Stops attack with controlled blade contact.",
+  "id": "deflection",
+  "name": "Deflection",
+  "description": "Perfectly timed minimal deflection that redirects attack and creates counter opportunity.",
   "type": "defense",
   "school": "none",
   "phases": {
@@ -22,18 +22,18 @@
   },
   "costs": {
     "stamina": {
-      "base": 3
+      "base": 2
     },
     "mp": 0,
-    "focus": 2,
-    "dailyFatigue": 2
+    "focus": 3,
+    "dailyFatigue": 3
   },
   "defenseProperties": {
-    "requiresLine": true,
-    "requiresAttackId": false,
+    "requiresLine": false,
+    "requiresAttackId": true,
     "defenseType": "deflection",
     "damageReduction": 1,
-    "counterSpeedBonus": 100
+    "counterSpeedBonus": 300
   },
   "metadata": {
     "weaponTypes": [
@@ -45,9 +45,10 @@
     "tags": [
       "defense",
       "melee",
-      "timing"
+      "counter",
+      "advanced"
     ],
-    "learningDifficulty": "medium"
+    "learningDifficulty": "hard"
   },
   "telegraphs": [
     {
@@ -60,26 +61,26 @@
     },
     {
       "stage": 2,
-      "assetId": "blade_to_line",
+      "assetId": "blade_specific_angle",
       "bodyPart": "weapon",
       "triggerTime": 100,
-      "description": "Blade begins moving deliberately to specific line shoulders adjust to brace for impact",
+      "description": "Blade moves with purpose to SPECIFIC angle hips rotate to optimal deflection position",
       "pause": true
     },
     {
       "stage": 3,
-      "assetId": "blade_intercept_line",
+      "assetId": "blade_perfect_angle",
       "bodyPart": "weapon",
       "triggerTime": 200,
-      "description": "Blade positioned on interception line arms locked braced clear defensive structure",
+      "description": "Blade at perfect intercept angle body coiled for sweeping motion point aimed at opening",
       "pause": true
     },
     {
       "stage": 4,
-      "assetId": "blades_clash",
+      "assetId": "minimal_contact_riposte",
       "bodyPart": "weapon",
       "triggerTime": 300,
-      "description": "Blades clash both fighters in bind pushing testing for advantage",
+      "description": "Blade makes minimal contact weapon slides harmlessly aside immediate riposte",
       "pause": false
     }
   ]

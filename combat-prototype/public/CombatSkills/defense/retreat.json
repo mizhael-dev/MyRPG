@@ -1,0 +1,83 @@
+{
+  "id": "retreat",
+  "name": "Retreat",
+  "description": "Step backward to create distance and break rhythm. Maintains guard but doesn't engage blade.",
+  "type": "defense",
+  "school": "none",
+  "phases": {
+    "windUp": {
+      "duration": 200,
+      "canCancel": true,
+      "canFeint": false,
+      "description": "Preparing defensive action"
+    },
+    "active": {
+      "duration": 400,
+      "description": "Defense is active and will trigger automatically"
+    },
+    "recovery": {
+      "duration": 300,
+      "description": "Resetting to guard position"
+    }
+  },
+  "costs": {
+    "stamina": {
+      "base": 2
+    },
+    "mp": 0,
+    "focus": 1,
+    "dailyFatigue": 2
+  },
+  "defenseProperties": {
+    "requiresLine": false,
+    "requiresAttackId": false,
+    "defenseType": "movement",
+    "damageReduction": 1,
+    "counterSpeedBonus": 0
+  },
+  "metadata": {
+    "weaponTypes": [
+      "any"
+    ],
+    "tags": [
+      "defense",
+      "movement",
+      "spacing"
+    ],
+    "learningDifficulty": "easy"
+  },
+  "telegraphs": [
+    {
+      "stage": 1,
+      "assetId": "weight_shift_back",
+      "bodyPart": "foot",
+      "triggerTime": 0,
+      "description": "Weight shifts to back foot",
+      "pause": true
+    },
+    {
+      "stage": 2,
+      "assetId": "hips_pull_back",
+      "bodyPart": "body",
+      "triggerTime": 100,
+      "description": "Hips pull backward torso leans away back leg muscles tense",
+      "pause": true
+    },
+    {
+      "stage": 3,
+      "assetId": "foot_lifts",
+      "bodyPart": "foot",
+      "triggerTime": 200,
+      "description": "Front foot lifts clear backward movement blade maintains guard but disengages",
+      "pause": true
+    },
+    {
+      "stage": 4,
+      "assetId": "lands_new_distance",
+      "bodyPart": "stance",
+      "triggerTime": 200,
+      "description": "Fighter lands at new distance blade still up but no threat",
+      "pause": false
+    }
+  ]
+}

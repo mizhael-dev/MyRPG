@@ -252,7 +252,7 @@ function buildAttackSkill(skillId, csvData) {
 
 /**
  * Builds defense skill JSON from CSV row data
- * Defense skills have different structure than attacks
+ * Defense skills have different structure than attacks but can have telegraphs
  */
 function buildDefenseSkill(skillId, csvData) {
   const get = (prop) => csvData[prop]?.[skillId];
@@ -262,7 +262,30 @@ function buildDefenseSkill(skillId, csvData) {
   const activeDuration = get('active_duration');
   const recoveryDuration = parseInt(get('recovery_duration'));
 
-  return {
+  // Detect telegraph stages dynamically (defense can have telegraphs too!)
+  const stages = detectTelegraphStages(csvData);
+
+  // Build telegraph array if telegraphs exist
+  const telegraphs = stages.length > 0 ? stages.map(stageNum => {
+    const assetId = get(`t${stageNum}_assetId`);
+
+    // Check if assets exist
+    const assetCheck = checkAssets(assetId);
+    if (!assetCheck.found) {
+      console.warn(`⚠️  Missing assets for "${assetId}" in ${skillId} (stage ${stageNum})`);
+    }
+
+    return {
+      stage: stageNum,  // Auto-generated from t{N}_ prefix
+      assetId: assetId,
+      bodyPart: get(`t${stageNum}_bodyPart`),
+      triggerTime: parseInt(get(`t${stageNum}_triggerTime`)),
+      description: get(`t${stageNum}_description`),
+      pause: get(`t${stageNum}_pause`) === 'true'
+    };
+  }) : undefined;
+
+  const skill = {
     id: skillId,
     name: get('name'),
     description: get('description'),
@@ -306,6 +329,113 @@ function buildDefenseSkill(skillId, csvData) {
       learningDifficulty: get('learningDifficulty')
     }
   };
+
+  // Add telegraphs only if they exist
+  if (telegraphs) {
+    skill.telegraphs = telegraphs;
+  }
+
+  return skill;
+}
+
+// ============================================================================
+// SPECIAL SKILL BUILDER
+// ============================================================================
+
+/**
+ * Builds special skill JSON from CSV row data
+ * Special skills have unique mechanics (feint, morph, etc.)
+ */
+function buildSpecialSkill(skillId, csvData) {
+  const get = (prop) => csvData[prop]?.[skillId];
+  const parseArray = (str) => str ? str.split('|').map(s => s.trim()) : [];
+
+  // Detect telegraph stages dynamically
+  const stages = detectTelegraphStages(csvData);
+
+  // Build telegraph array if telegraphs exist
+  const telegraphs = stages.length > 0 ? stages.map(stageNum => {
+    const assetId = get(`t${stageNum}_assetId`);
+
+    // Check if assets exist
+    const assetCheck = checkAssets(assetId);
+    if (!assetCheck.found) {
+      console.warn(`⚠️  Missing assets for "${assetId}" in ${skillId} (stage ${stageNum})`);
+    }
+
+    return {
+      stage: stageNum,
+      assetId: assetId,
+      bodyPart: get(`t${stageNum}_bodyPart`),
+      triggerTime: parseInt(get(`t${stageNum}_triggerTime`)),
+      description: get(`t${stageNum}_description`),
+      pause: get(`t${stageNum}_pause`) === 'true'
+    };
+  }) : undefined;
+
+  const skill = {
+    id: skillId,
+    name: get('name'),
+    description: get('description'),
+    type: 'special',  // Auto-generated
+    specialType: get('specialType'),
+    school: get('school') || 'none',
+    mechanics: {
+      requiresActiveAttack: get('requiresActiveAttack') === 'true',
+      requiresDefenderTelegraph: get('requiresDefenderTelegraph') === 'true',
+      requiresDifferentLine: get('requiresDifferentLine') === 'true',
+      availableInPhase: get('availableInPhase'),
+      cannotUseAfter: get('cannotUseAfter'),
+      timing: {
+        recognitionTime: parseInt(get('recognitionTime')),
+        adjustmentTime: parseInt(get('adjustmentTime')),
+        timePenalty: parseInt(get('timePenalty')),
+        description: get('morphDescription')
+      },
+      execution: {
+        flow: parseArray(get('executionFlow')),
+        resetBehavior: get('resetBehavior'),
+        newAttackStartTime: parseInt(get('newAttackStartTime'))
+      }
+    },
+    costs: {
+      stamina: {
+        base: parseInt(get('stamina_base')),
+        multiplier: parseFloat(get('staminaMultiplier')),
+        calculation: get('stamina_calculation'),
+        originalAttackStaminaLost: get('originalAttackStaminaLost') === 'true',
+        description: get('staminaDescription')
+      },
+      mp: parseInt(get('mp_base')),
+      focus: parseInt(get('focus_base')),
+      dailyFatigue: parseInt(get('dailyFatigue_base'))
+    },
+    tacticalEffects: {
+      onSuccessfulRead: get('onSuccessfulRead'),
+      onMisread: get('onMisread'),
+      bypassesDefense: get('bypassesDefense') === 'true',
+      revealsIntent: get('revealsIntent') === 'true',
+      requiresLineDifference: get('requiresLineDifference') === 'true',
+      counterplayAvailable: get('counterplayAvailable')
+    },
+    requirements: {
+      skill: get('requiresSkill'),
+      lineRestriction: get('lineRestriction'),
+      timingWindow: get('timingWindow')
+    },
+    metadata: {
+      weaponTypes: parseArray(get('weaponTypes') || ''),
+      tags: parseArray(get('tags')),
+      learningDifficulty: get('learningDifficulty')
+    }
+  };
+
+  // Add telegraphs only if they exist
+  if (telegraphs) {
+    skill.telegraphs = telegraphs;
+  }
+
+  return skill;
 }
 
 // ============================================================================
@@ -385,6 +515,37 @@ function buildSkills(validateOnly = false) {
     }
   } catch (err) {
     console.error(`❌ Failed to process defense CSV: ${err.message}`);
+    errors++;
+  }
+
+  // Process special skills (if CSV exists)
+  try {
+    const specialCSV = csvDir + '/special/CombatSkills-special.csv';
+    if (fs.existsSync(specialCSV)) {
+      console.log('\n📊 Processing special skills CSV...');
+      const data = parseCSV(specialCSV);
+
+      data.columns.forEach(skillId => {
+        try {
+          const skill = buildSpecialSkill(skillId, data.data);
+
+          if (!validateOnly) {
+            const outputPath = path.join(outputDir, 'special', `${skillId}.json`);
+            fs.writeFileSync(outputPath, JSON.stringify(skill, null, 2));
+            console.log(`  ✓ ${skillId}.json`);
+          } else {
+            console.log(`  ✓ ${skillId} validated`);
+          }
+
+          totalSkills++;
+        } catch (err) {
+          console.error(`  ✗ ${skillId}: ${err.message}`);
+          errors++;
+        }
+      });
+    }
+  } catch (err) {
+    console.error(`❌ Failed to process special CSV: ${err.message}`);
     errors++;
   }
 

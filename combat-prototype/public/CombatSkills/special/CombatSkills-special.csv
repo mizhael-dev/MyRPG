@@ -1,0 +1,69 @@
+id,feint
+name,Feint (Attack Morph)
+description,Change attack mid-motion after reading defender's telegraph. Threaten one line then strike another to bypass prepared defense.
+# Special Mechanics
+specialType,attack_morph
+requiresActiveAttack,true
+requiresDefenderTelegraph,true
+requiresDifferentLine,true
+availableInPhase,windUp
+cannotUseAfter,committed
+# Timing Mechanics (ms)
+recognitionTime,0
+adjustmentTime,100
+timePenalty,100
+morphDescription,Reading defender's telegraph then adjusting attack angle mid-motion
+# Execution Flow
+executionFlow,1_Read defender telegraph|2_Cancel current attack windUp|3_Apply 100ms penalty|4_Start new attack windUp|5_Continue with new attack
+resetBehavior,reset_to_zero_plus_penalty
+newAttackStartTime,100
+# Stamina Mechanics
+staminaMultiplier,1.4
+staminaDescription,Costs base attack stamina * 1.4 (40% penalty for changing momentum)
+originalAttackStaminaLost,true
+# Success Conditions
+onSuccessfulRead,New attack bypasses defender's prepared defense line
+onMisread,Morphed attack telegraphs revealed defender adapts
+# Telegraph Stage 1
+t1_triggerTime,0
+t1_assetId,shoulders_tense
+t1_bodyPart,shoulders
+t1_description,Shoulders tense up as original attack begins
+t1_pause,true
+# Telegraph Stage 2
+t2_triggerTime,100
+t2_assetId,shoulders_shift
+t2_bodyPart,shoulders
+t2_description,Shoulders shift suddenly reading defender's commitment
+t2_pause,true
+# Telegraph Stage 3
+t3_triggerTime,200
+t3_assetId,blade_path_changes
+t3_bodyPart,weapon
+t3_description,Blade path changes mid-motion redirecting to new line
+t3_pause,true
+# Telegraph Stage 4
+t4_triggerTime,300
+t4_assetId,new_trajectory
+t4_bodyPart,stance
+t4_description,New trajectory established body adjusts to morphed attack
+t4_pause,false
+# Tactical Properties
+bypassesDefense,true
+revealsIntent,true
+requiresLineDifference,true
+counterplayAvailable,defender_can_emergency_defense
+# Requirements
+requiresSkill,Must read defender's telegraph (stages 2-3 of defense windUp)
+lineRestriction,New attack must be on different line than original
+timingWindow,Only during attacker's windUp phase before committed
+# Metadata
+weaponTypes,sword|axe|dagger|spear
+tags,special|tactical|morph|mind-game|advanced
+learningDifficulty,very_hard
+# Resources (LAST)
+stamina_base,0
+stamina_calculation,original_attack_stamina * 1.4
+mp_base,0
+focus_base,3
+dailyFatigue_base,3

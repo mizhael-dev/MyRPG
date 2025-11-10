@@ -1,0 +1,83 @@
+{
+  "id": "emergency_defense",
+  "name": "Emergency Defense",
+  "description": "A desperate last-moment reaction. Can be executed very late but leaves you in poor position.",
+  "type": "defense",
+  "school": "none",
+  "phases": {
+    "windUp": {
+      "duration": 100,
+      "canCancel": true,
+      "canFeint": false,
+      "description": "Preparing defensive action"
+    },
+    "active": {
+      "duration": 200,
+      "description": "Defense is active and will trigger automatically"
+    },
+    "recovery": {
+      "duration": 500,
+      "description": "Resetting to guard position"
+    }
+  },
+  "costs": {
+    "stamina": {
+      "base": 2
+    },
+    "mp": 0,
+    "focus": 2,
+    "dailyFatigue": 4
+  },
+  "defenseProperties": {
+    "requiresLine": false,
+    "requiresAttackId": false,
+    "defenseType": "emergency",
+    "damageReduction": 0.5,
+    "counterSpeedBonus": 0
+  },
+  "metadata": {
+    "weaponTypes": [
+      "any"
+    ],
+    "tags": [
+      "defense",
+      "emergency",
+      "last-resort"
+    ],
+    "learningDifficulty": "easy"
+  },
+  "telegraphs": [
+    {
+      "stage": 1,
+      "assetId": "eyes_widen",
+      "bodyPart": "eyes",
+      "triggerTime": 0,
+      "description": "Eyes widen suddenly",
+      "pause": true
+    },
+    {
+      "stage": 2,
+      "assetId": "arms_flail",
+      "bodyPart": "arms",
+      "triggerTime": 100,
+      "description": "Arms flail upward chaotically blade position erratic shoulders hunch defensively",
+      "pause": true
+    },
+    {
+      "stage": 3,
+      "assetId": "stumble_off_balance",
+      "bodyPart": "stance",
+      "triggerTime": 200,
+      "description": "Fighter stumbles off-balance vulnerable",
+      "pause": true
+    },
+    {
+      "stage": 4,
+      "assetId": "deep_recovery",
+      "bodyPart": "stance",
+      "triggerTime": 300,
+      "description": "Deep recovery regaining composure and stance",
+      "pause": false
+    }
+  ]
+}

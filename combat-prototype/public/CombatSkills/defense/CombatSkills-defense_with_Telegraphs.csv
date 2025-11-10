@@ -1,0 +1,19 @@
+Telegraph Phase,Emergency Defense,Move Backwards,Parry,Deflection,Feint (Attacker)
+Telegraph 1: Initiation: low certainty,Eyes widen suddenly,Weight shifts to back foot,Eyes lock on opponent's blade,Eyes lock on opponent's blade,Shoulders tens up
+Telegraph 2: Early Wind-Up,"Arms flail upward chaotically, blade position erratic, shoulders hunch defensively","Hips pull backward, torso leans away, back leg muscles tense","Blade begins moving deliberately to specific line (high/low, left/right), shoulders adjust to brace for impact","Blade moves with purpose to SPECIFIC angle (clearly committing to one attack type), hips rotate to optimal deflection position",Shoulders shift suddenly
+Telegraph 3: Active Motion,"Fighter stumbles, off-balance, vulnerable (already in recovery)","Front foot lifts, clear backward movement, blade maintains guard but disengages","Blade positioned on interception line, arms locked/braced, clear defensive structure","Blade at perfect intercept angle, body coiled for sweeping motion, point already aimed at opponent's opening",balade path changes
+Telegraph 4: Completion,Deep recovery - regaining composure and stance,"Fighter lands at new distance, blade still up but no threat","Blades clash, both fighters in bind, pushing/testing for advantage","Success moment: Blade makes minimal contact, opponent's weapon slides harmlessly aside, immediate riposte",New trajectory established
+Telegraph 1 (trigger time),0.0,0.0,0.0,0.0,0.0
+Telegraph 2 (trigger time),0.1,0.1,0.1,0.1,0.1
+Telegraph 3 (trigger rime),0.2,0.2,0.2,0.2,0.2
+Telegraph 4 (trigger time),0.3,0.2,0.3,0.3,per new attack + 0.1
+windUp duration (s),0.1,0.2,0.3,0.3,per new attack + 0.1
+Active Motion Time (s),0.2,0.4,0.5,0.5,per new attack + 0.1
+Total Execution Time (s),0.3,0.6,0.8,0.8,per new attack
+Recovery Time (s),0.5,0.3,0.2,0,
+,,,,,
+Wind-up Time,0.0-0.05s,0.1-0.2s,0.2-0.3s,0.3-0.5s,Recognition: 0.0-0.1s
+Active Motion Time,0.05-0.15s,0.2-0.4s,0.1-0.2s,0.1-0.15s,Adjustement: 0.2-0.3s
+Total Execution Time,0.15-0.2s,0.6-0.8s,0.3-0.5s,0.4-0.65s,Variable (new attack)
+Recovery Time,0.6-0.9s,0.3-0.4s,0.4-0.5s,0.2-0.3s,Per new attack
+When Available,ANY time - need 0.15-0.2s before impact,ANY time - need 0.6-0.8s before impact + space,Phase 3-4 of opponent's attack,Attempt from Phase 1+; Succeeds only during opponent's Phase 4,Before point of no return (phase 2-3)
