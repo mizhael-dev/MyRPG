@@ -45,12 +45,12 @@ export interface PhaseTimings {
  * A single telegraph stage that reveals information about an attack
  */
 export interface Telegraph {
-  stage: number;              // Telegraph sequence number (1, 2, 3, 4)
+  stage: number;              // Telegraph sequence number (1, 2, 3, 4, ...)
+  assetId: string;            // Reference to shared asset (e.g., "shoulders_tense")
   bodyPart: string;           // Which body part shows the tell (foot, shoulders, weapon, stance)
   triggerTime: number;        // When this telegraph becomes visible (ms into action)
-  visibilityPercent: number;  // How confident defender is (20%, 40%, 60%, 95%)
   description: string;        // Human-readable description
-  possibleSkills: string[];   // Which skills could still match this telegraph
+  pause?: boolean;            // Whether to auto-pause when this telegraph is revealed
 }
 
 // ============================================================================
@@ -101,6 +101,17 @@ export interface ResourceCosts {
 // ============================================================================
 
 /**
+ * Defense-specific properties for defensive skills
+ */
+export interface DefenseProperties {
+  requiresLine?: boolean;        // Parry needs line selection (horizontal/center/diagonal/high/low)
+  requiresAttackId?: boolean;    // Deflection needs specific attack prediction
+  defenseType: 'emergency' | 'movement' | 'deflection';
+  damageReduction: number;       // 0.0-1.0 (0.5 = 50% reduction, 1.0 = full block)
+  counterSpeedBonus?: number;    // Ms reduction to next attack windUp (e.g., 100 for deflection)
+}
+
+/**
  * Complete skill definition loaded from JSON
  * Matches the structure in /CombatSkills/ folder
  */
@@ -109,6 +120,7 @@ export interface CombatSkill {
   name: string;
   description: string;
   type: 'attack' | 'defense' | 'special';
+  line: 'horizontal' | 'center' | 'diagonal' | 'high' | 'low';  // Attack direction for targeting
   school: string;
   phases: PhaseTimings;
   costs: ResourceCosts;
@@ -118,12 +130,7 @@ export interface CombatSkill {
     baseValue: number;
     scaling?: Record<string, number>;
   };
-  defensiveProperties?: {
-    defenseType: string;
-    damageReduction: number;
-    effectiveWindow?: any;
-    onSuccess?: any;
-  };
+  defenseProperties?: DefenseProperties;
   metadata: {
     weaponTypes: string[];
     tags: string[];
@@ -175,7 +182,6 @@ export interface ActionState {
  */
 export type PauseReason =
   | 'new_telegraph'           // New telegraph became visible
-  | 'possibleSkills_changed'  // Set of possible attacks narrowed
   | 'option_expiring'         // Decision window closing
   | 'manual';                 // Player pressed pause
 
@@ -187,8 +193,6 @@ export interface PauseState {
   reason: PauseReason | null;
   availableActions: string[];  // What actions player can take
   prediction: {
-    possibleSkills: string[];  // What attacks opponent might do
-    confidence: number;         // How certain (0-100%)
     estimatedImpactRange: {
       min: number;              // Earliest possible impact (ms)
       max: number;              // Latest possible impact (ms)

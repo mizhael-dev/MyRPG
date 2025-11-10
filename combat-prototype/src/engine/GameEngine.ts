@@ -95,7 +95,7 @@ export class GameEngine {
         maxDailyFatigue: 100,
       },
       currentAction: null,
-      availableSkills: ['slash', 'thrust', 'parry'], // Default skills
+      availableSkills: ['side_slash', 'thrust', 'parry'], // Default skills
       hitsRemaining: 3, // Starts with 3 hits, clean hit = instant death (0), non-clean = -1
     };
   }
@@ -111,17 +111,20 @@ export class GameEngine {
 
     try {
       // Load attack skills
-      const slashResponse = await fetch('/CombatSkills/attacks/slash.json');
+      const slashResponse = await fetch('/CombatSkills/attacks/side_slash.json');
       const slash = await slashResponse.json();
-      this.skills.set('slash', slash);
+      this.validateSkill(slash);
+      this.skills.set('side_slash', slash);
 
       const thrustResponse = await fetch('/CombatSkills/attacks/thrust.json');
       const thrust = await thrustResponse.json();
+      this.validateSkill(thrust);
       this.skills.set('thrust', thrust);
 
       // Load defense skills
       const parryResponse = await fetch('/CombatSkills/defense/parry.json');
       const parry = await parryResponse.json();
+      this.validateSkill(parry);
       this.skills.set('parry', parry);
 
       console.log('[GameEngine] Loaded skills:', Array.from(this.skills.keys()));
@@ -129,6 +132,25 @@ export class GameEngine {
     } catch (error) {
       console.error('[GameEngine] Failed to load skills:', error);
       this.log('ERROR: Failed to load combat skills');
+      throw error; // Re-throw to make validation errors visible
+    }
+  }
+
+  /**
+   * Validate skill JSON structure
+   * Ensures impact tick = windUp duration + committed duration
+   */
+  private validateSkill(skill: any): void {
+    if (skill.type === 'attack') {
+      const windUp = skill.phases.windUp.duration;
+      const committed = skill.phases.committed.duration;
+      const impactTick = skill.phases.impact.tick;
+
+      if (impactTick !== windUp + committed) {
+        throw new Error(
+          `Invalid skill "${skill.id}": impact tick (${impactTick}) must equal windUp (${windUp}) + committed (${committed}) = ${windUp + committed}`
+        );
+      }
     }
   }
 
@@ -316,7 +338,7 @@ export class GameEngine {
           action.visibleTelegraphs.push(telegraph);
 
           this.log(
-            `${fighter.name} telegraph ${telegraph.stage}: ${telegraph.description} (${telegraph.visibilityPercent}%)`
+            `${fighter.name} telegraph ${telegraph.stage}: ${telegraph.description}`
           );
 
           this.emitEvent({
@@ -461,37 +483,38 @@ export class GameEngine {
   }
 
   /**
-   * Check if combat should auto-pause
+   * Check if combat should auto-pause based on telegraph.pause field
    */
   private checkAutoPause(
     fighter: FighterState,
-    reason: 'new_telegraph' | 'possibleSkills_changed',
+    reason: 'new_telegraph',
     telegraph?: any
   ): void {
-    // For now, auto-pause on every new telegraph
-    // TODO: More sophisticated pause logic (check if possibleSkills actually changed)
-
     if (reason === 'new_telegraph' && telegraph) {
-      this.pauseState.isPaused = true;
-      this.pauseState.reason = 'new_telegraph';
-      this.pauseState.availableActions = ['slash', 'thrust', 'parry']; // TODO: Calculate based on time available
+      // Check if this telegraph should trigger a pause
+      if (telegraph.pause === true) {
+        this.pauseState.isPaused = true;
+        this.pauseState.reason = 'new_telegraph';
+        this.pauseState.availableActions = ['side_slash', 'thrust', 'parry']; // TODO: Calculate based on time available
 
-      // Build prediction
-      this.pauseState.prediction = {
-        possibleSkills: telegraph.possibleSkills || [],
-        confidence: telegraph.visibilityPercent || 0,
-        estimatedImpactRange: {
-          min: 1000, // TODO: Calculate from possible skills
-          max: 2500,
-        },
-      };
+        // Build prediction
+        this.pauseState.prediction = {
+          estimatedImpactRange: {
+            min: 1000, // TODO: Calculate from opponent's current action
+            max: 2500,
+          },
+        };
 
-      this.log(`Auto-pause: ${reason} (${telegraph.description})`);
+        this.log(`Auto-pause: ${telegraph.description}`);
 
-      this.emitEvent({
-        type: 'PAUSE_TRIGGERED',
-        pauseState: this.pauseState,
-      });
+        this.emitEvent({
+          type: 'PAUSE_TRIGGERED',
+          pauseState: this.pauseState,
+        });
+      } else {
+        // Telegraph revealed but no pause - just log it
+        this.log(`Telegraph revealed: ${telegraph.description}`);
+      }
     }
   }
 

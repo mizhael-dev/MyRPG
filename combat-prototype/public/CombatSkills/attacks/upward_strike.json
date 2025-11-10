@@ -1,39 +1,35 @@
 {
   "id": "upward_strike",
   "name": "Upward Strike",
-  "description": "A fast rising cut from low to high. Breaks guard positions and forces opponent to react quickly.",
+  "description": "A rising attack from low position",
   "type": "attack",
+  "line": "low",
   "school": "none",
   "phases": {
     "windUp": {
-      "duration": 800,
+      "duration": 400,
       "canCancel": true,
       "canFeint": true,
-      "description": "Attacker lowers weapon and body, preparing to strike upward"
+      "description": "Attacker prepares the attack, telegraphs become progressively visible"
     },
     "committed": {
-      "duration": 500,
+      "duration": 600,
       "canCancel": false,
       "canFeint": false,
-      "description": "Body rising, weapon cutting upward in fast arc"
+      "description": "Committed to the attack, weapon in motion, cannot be cancelled"
     },
     "impact": {
-      "tick": 1300,
-      "description": "Weapon strikes upward into target"
+      "tick": 1000,
+      "description": "The weapon connects with the target"
     },
     "recovery": {
-      "duration": 600,
-      "description": "Resetting from high position, bringing weapon back to guard"
+      "duration": 400,
+      "description": "Recovering from the attack, regaining balance and guard position"
     }
   },
   "costs": {
     "stamina": {
-      "base": 2,
-      "variablePower": {
-        "min": 1,
-        "max": 3,
-        "description": "Can use 50% less (1 stamina) for weaker/slower attack, or 50% more (3 stamina) for explosive rising strike"
-      }
+      "base": 2
     },
     "mp": 0,
     "focus": 2,
@@ -42,53 +38,53 @@
   "telegraphs": [
     {
       "stage": 1,
-      "bodyPart": "foot",
-      "triggerTime": 120,
-      "visibilityPercent": 20,
-      "description": "Knees bend, body lowering subtly",
-      "possibleSkills": ["upward_strike", "thrust"]
+      "assetId": "shoulders_tense",
+      "bodyPart": "shoulders",
+      "triggerTime": 0,
+      "description": "Shoulders tens up",
+      "pause": true
     },
     {
       "stage": 2,
+      "assetId": "blade_drops_low",
       "bodyPart": "weapon",
-      "triggerTime": 350,
-      "visibilityPercent": 50,
-      "description": "Weapon drops to low position, point angling upward",
-      "possibleSkills": ["upward_strike"]
+      "triggerTime": 100,
+      "description": "Blade drops low",
+      "pause": true
     },
     {
       "stage": 3,
-      "bodyPart": "shoulders",
-      "triggerTime": 650,
-      "visibilityPercent": 80,
-      "description": "Shoulders begin rotating upward, arms extending",
-      "possibleSkills": ["upward_strike"]
+      "assetId": "blade_points_down",
+      "bodyPart": "weapon",
+      "triggerTime": 200,
+      "description": "Blade point aims downward",
+      "pause": true
     },
     {
       "stage": 4,
+      "assetId": "rising_commit",
       "bodyPart": "stance",
-      "triggerTime": 950,
-      "visibilityPercent": 95,
-      "description": "Full commitment, body rising explosively with weapon",
-      "possibleSkills": ["upward_strike"]
+      "triggerTime": 400,
+      "description": "Knees straighten body rises blade begins upward arc",
+      "pause": false
     }
   ],
   "damage": {
     "type": "slashing",
     "baseValue": 1,
     "scaling": {
-      "strength": 0.7,
-      "agility": 0.6
-    },
-    "notes": "In prototype: 1 clean hit = death. Fast attack that's hard to defend against due to unusual angle."
-  },
-  "specialProperties": {
-    "breaksGuard": true,
-    "description": "Forces defender's weapon upward, creating opening for follow-up attacks"
+      "strength": 1
+    }
   },
   "metadata": {
-    "weaponTypes": ["sword", "dagger"],
-    "tags": ["fast", "melee", "slashing", "guard-break"],
-    "learningDifficulty": "medium"
+    "weaponTypes": [
+      "sword"
+    ],
+    "tags": [
+      "basic",
+      "melee",
+      "rising"
+    ],
+    "learningDifficulty": "easy"
   }
 }

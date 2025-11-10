@@ -1,13 +1,13 @@
 {
-  "id": "overhead_strike",
-  "name": "Overhead Strike",
-  "description": "Vertical overhead attack with the weapon",
+  "id": "side_slash",
+  "name": "Horizontal Strike",
+  "description": "A horizontal attack with the weapon. Naturally follows body rotation and can chain into follow-up attacks but wide arc makes it slower",
   "type": "attack",
-  "line": "high",
+  "line": "horizontal",
   "school": "none",
   "phases": {
     "windUp": {
-      "duration": 400,
+      "duration": 500,
       "canCancel": true,
       "canFeint": true,
       "description": "Attacker prepares the attack, telegraphs become progressively visible"
@@ -19,11 +19,11 @@
       "description": "Committed to the attack, weapon in motion, cannot be cancelled"
     },
     "impact": {
-      "tick": 1200,
+      "tick": 1300,
       "description": "The weapon connects with the target"
     },
     "recovery": {
-      "duration": 800,
+      "duration": 500,
       "description": "Recovering from the attack, regaining balance and guard position"
     }
   },
@@ -46,26 +46,26 @@
     },
     {
       "stage": 2,
-      "assetId": "blade_rises_high",
-      "bodyPart": "weapon",
+      "assetId": "torso_rotate",
+      "bodyPart": "body",
       "triggerTime": 100,
-      "description": "Blade rises high",
+      "description": "Torso rotates sideways",
       "pause": true
     },
     {
       "stage": 3,
-      "assetId": "blade_overhead",
+      "assetId": "blade_wide_side",
       "bodyPart": "weapon",
       "triggerTime": 200,
-      "description": "Blade rises directly above head",
+      "description": "Blade pulls wide to the side",
       "pause": true
     },
     {
       "stage": 4,
-      "assetId": "vertical_commit",
+      "assetId": "horizontal_commit",
       "bodyPart": "stance",
-      "triggerTime": 400,
-      "description": "Brief pause at apex blade perfectly vertical",
+      "triggerTime": 500,
+      "description": "Hips reach maximum coil leading shoulder drops",
       "pause": false
     }
   ],
@@ -79,12 +79,13 @@
   "metadata": {
     "weaponTypes": [
       "sword",
-      "axe"
+      "axe",
+      "dagger"
     ],
     "tags": [
       "basic",
       "melee",
-      "vertical"
+      "horizontal"
     ],
     "learningDifficulty": "easy"
   }

@@ -1,0 +1,45 @@
+id,overhead_strike,side_slash,thrust,upward_strike,diagonal_slash
+name,Overhead Strike,Horizontal Strike,Thrust,Upward Strike,Diagonal Slash
+description,Vertical overhead attack with the weapon,A horizontal attack with the weapon. Naturally follows body rotation and can chain into follow-up attacks but wide arc makes it slower,A forward stabbing attack with the weapon. Faster than slash with forward momentum,A rising attack from low position,An angled cutting attack from high to low. Versatile and harder to predict than horizontal slash
+line,high,horizontal,center,low,diagonal
+# Phase Timings (ms)
+windUp_duration,400,500,250,400,600
+committed_duration,800,800,600,600,500
+impact_tick,AUTO,AUTO,AUTO,AUTO,AUTO
+recovery_duration,800,500,700,400,600
+# Telegraph Stage 1
+t1_triggerTime,0,0,0,0,0
+t1_assetId,shoulders_tense,shoulders_tense,weight_shift_back,shoulders_tense,shoulders_tense
+t1_bodyPart,shoulders,shoulders,foot,shoulders,shoulders
+t1_description,Shoulders tens up,Shoulders tens up,Weight shifts to back foot,Shoulders tens up,Shoulders tens up
+t1_pause,true,true,true,true,true
+# Telegraph Stage 2
+t2_triggerTime,100,100,100,100,100
+t2_assetId,blade_rises_high,torso_rotate,weight_shift_forward,blade_drops_low,blade_rises_diagonal
+t2_bodyPart,weapon,body,foot,weapon,body
+t2_description,Blade rises high,Torso rotates sideways,Weight shifts forward,Blade drops low,Blade rises high | Torso rotates sideways
+t2_pause,true,true,true,true,true
+# Telegraph Stage 3
+t3_triggerTime,200,200,200,200,200
+t3_assetId,blade_overhead,blade_wide_side,point_forward,blade_points_down,blade_shoulder_diagonal
+t3_bodyPart,weapon,weapon,weapon,weapon,weapon
+t3_description,Blade rises directly above head,Blade pulls wide to the side,Point aims directly at target in straight line,Blade point aims downward,Blade rises to the shoulder
+t3_pause,true,true,true,true,true
+# Telegraph Stage 4
+t4_triggerTime,400,500,250,400,600
+t4_assetId,vertical_commit,horizontal_commit,thrust_commit,rising_commit,diagonal_commit
+t4_bodyPart,stance,stance,stance,stance,stance
+t4_description,Brief pause at apex blade perfectly vertical,Hips reach maximum coil leading shoulder drops,Weight shifts decisively forward rear leg muscles visibly tense,Knees straighten body rises blade begins upward arc,Clear diagonal line from high shoulder to low opposite hip
+t4_pause,false,false,false,false,false
+# Damage
+damage_type,slashing,slashing,piercing,slashing,slashing
+damage_baseValue,1,1,1,1,1
+# Metadata
+weaponTypes,sword|axe,sword|axe|dagger,sword|spear|dagger,sword,sword|axe
+tags,basic|melee|vertical,basic|melee|horizontal,basic|melee|piercing|fast,basic|melee|rising,versatile|melee|slashing|angled
+learningDifficulty,easy,easy,easy,easy,medium
+# Resources (LAST)
+stamina_base,2,2,2,2,2
+mp_base,0,0,0,0,0
+focus_base,2,2,2,2,2
+dailyFatigue_base,2,2,2,2,2

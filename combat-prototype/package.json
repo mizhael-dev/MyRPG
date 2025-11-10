@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:skills": "node scripts/buildSkills.cjs",
+    "validate:skills": "node scripts/buildSkills.cjs --validate"
   },
   "dependencies": {
     "react": "^19.1.1",
