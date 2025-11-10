@@ -32,7 +32,7 @@
     "requiresLine": false,
     "requiresAttackId": false,
     "defenseType": "emergency",
-    "damageReduction": 0.5,
+    "damageReduction": 2,
     "counterSpeedBonus": 0
   },
   "metadata": {

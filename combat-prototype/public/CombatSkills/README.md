@@ -10,11 +10,13 @@ This folder contains the **source of truth** for all combat skills in the game.
    - `/special/CombatSkills-special.csv` - Special skills (feint, etc.)
 
 2. **Rebuild JSON files**:
+
    ```bash
    npm run build:skills
    ```
 
 3. **Validate without writing** (check for errors):
+
    ```bash
    npm run validate:skills
    ```
@@ -37,6 +39,7 @@ windUp_duration,400,500,200
 ```
 
 **Advantages:**
+
 - See all skills side-by-side
 - Easy to compare timing values
 - Fast bulk editing in text editor
@@ -45,6 +48,7 @@ windUp_duration,400,500,200
 ### What Gets Auto-Generated
 
 You **don't need** to include these in CSV (build script adds them):
+
 - `type: "attack"`, `"defense"`, or `"special"` - Based on which CSV file
 - `school: "none"` - Default value
 - `stage` numbers in telegraphs - Derived from `t1_`, `t2_`, etc.
@@ -52,6 +56,7 @@ You **don't need** to include these in CSV (build script adds them):
 ### Calculated Values
 
 **`impact_tick = AUTO`** means:
+
 ```
 impact_tick = windUp_duration + committed_duration
 ```
@@ -77,6 +82,7 @@ Build script calculates this automatically and validates it.
 Want to add stage 5 to a skill?
 
 1. Add these rows to the CSV:
+
    ```csv
    t5_triggerTime,700,0,0,0,0
    t5_assetId,special_tell,placeholder,placeholder,placeholder,placeholder
@@ -87,11 +93,12 @@ Want to add stage 5 to a skill?
 
 2. Run: `npm run build:skills`
 
-**No limit on telegraph stages!** Use t1_, t2_, t3_, ..., t99_, etc.
+**No limit on telegraph stages!** Use t1*, t2*, t3*, ..., t99*, etc.
 
 ### Add a New Skill
 
 1. Add a new column to the CSV:
+
    ```csv
    id,overhead_strike,side_slash,thrust,NEW_SKILL_ID
    name,Overhead Strike,Horizontal Strike,Thrust,Cool New Attack
@@ -117,6 +124,7 @@ t1_assetId,shoulders_tense,...
 ```
 
 This looks for:
+
 - `shoulders_tense.png` (static image)
 - `shoulders_tense.mp4` (video animation)
 - `shoulders_tense_anim.json` (animation data)
@@ -216,6 +224,7 @@ counterSpeedBonus,0,0,100,300
 ```
 
 **Key differences from attacks:**
+
 - `active_duration` instead of `committed_duration` (use `N/A` for instant defenses)
 - No `impact_tick` (defense timing is based on active window)
 - No `line` field (only attacks have line direction)
@@ -223,6 +232,7 @@ counterSpeedBonus,0,0,100,300
 - Defense-specific properties: `requiresLine`, `requiresAttackId`, `defenseType`, `damageReduction`, `counterSpeedBonus`
 
 **Defense Types:**
+
 - `emergency` - Last resort, can be used late, reduced damage
 - `movement` - Movement-based defense (dodge, retreat)
 - `deflection` - Blade-based defense (parry, deflection)
@@ -269,6 +279,7 @@ onMisread,Morphed attack telegraphs revealed defender adapts
 ```
 
 **Key features of special skills:**
+
 - Unique mechanics tied to game state (active attacks, defender telegraphs)
 - Complex execution flow with multiple steps
 - Timing penalties and stamina multipliers
@@ -276,12 +287,14 @@ onMisread,Morphed attack telegraphs revealed defender adapts
 - Telegraphs show the special action in progress
 
 **Special Types:**
+
 - `attack_morph` - Change attack mid-motion (feint)
 - Additional special types can be added for other tactical actions
 
 ### Array Values
 
 Use `|` separator for arrays:
+
 ```csv
 weaponTypes,sword|axe|dagger
 tags,basic|melee|fast
@@ -314,6 +327,7 @@ The build script checks:
 **Problem:** Impact tick doesn't match windUp + committed
 
 **Fix:**
+
 1. Check your CSV values
 2. Or set `impact_tick,AUTO,AUTO,AUTO,...` to auto-calculate
 
@@ -322,6 +336,7 @@ The build script checks:
 **Problem:** Asset file doesn't exist
 
 **Fix:**
+
 - Create the asset file in `/public/assets/telegraphs/`
 - OR ignore warning (placeholder will be used)
 
@@ -344,16 +359,19 @@ The build script checks:
 **Scenario:** Make thrust faster
 
 1. Edit CSV:
+
    ```csv
    windUp_duration,400,500,**150**,400,600
    ```
 
 2. Rebuild:
+
    ```bash
    npm run build:skills
    ```
 
 3. Output:
+
    ```
    ✓ thrust.json
    impact_tick auto-calculated: 750 (150 + 600)

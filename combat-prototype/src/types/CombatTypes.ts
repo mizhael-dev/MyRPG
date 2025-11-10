@@ -10,10 +10,13 @@
 // ============================================================================
 
 /**
- * The four phases every combat action goes through
+ * The phases combat actions go through
  * Based on Combat3 - atomic_turns.md specification
+ *
+ * Attack flow: windUp → committed → impact → recovery
+ * Defense flow: windUp → active → recovery
  */
-export type CombatPhase = 'windUp' | 'committed' | 'impact' | 'recovery';
+export type CombatPhase = 'windUp' | 'committed' | 'active' | 'impact' | 'recovery';
 
 /**
  * Phase timing information from skill JSON
@@ -28,6 +31,10 @@ export interface PhaseTimings {
     duration: number;      // How long committed phase lasts (ms)
     canCancel: boolean;    // Always false - cannot cancel once committed
     canFeint: boolean;     // Always false
+  };
+  active?: {
+    duration: number;      // How long defense active window lasts (ms) - only for defenses
+    description: string;   // Description of active phase
   };
   impact: {
     tick: number;          // Exact ms when impact occurs

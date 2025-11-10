@@ -95,7 +95,7 @@ export class GameEngine {
         maxDailyFatigue: 100,
       },
       currentAction: null,
-      availableSkills: ['side_slash', 'thrust', 'overhead_strike', 'upward_strike', 'diagonal_slash', 'parry'], // Default skills
+      availableSkills: ['side_slash', 'thrust', 'overhead_strike', 'upward_strike', 'diagonal_slash', 'parry', 'emergency_defense', 'retreat', 'deflection'], // All skills
       hitsRemaining: 3, // Starts with 3 hits, clean hit = instant death (0), non-clean = -1
     };
   }
@@ -141,6 +141,21 @@ export class GameEngine {
       const parry = await parryResponse.json();
       this.validateSkill(parry);
       this.skills.set('parry', parry);
+
+      const emergencyResponse = await fetch('/CombatSkills/defense/emergency_defense.json');
+      const emergency = await emergencyResponse.json();
+      this.validateSkill(emergency);
+      this.skills.set('emergency_defense', emergency);
+
+      const retreatResponse = await fetch('/CombatSkills/defense/retreat.json');
+      const retreat = await retreatResponse.json();
+      this.validateSkill(retreat);
+      this.skills.set('retreat', retreat);
+
+      const deflectionResponse = await fetch('/CombatSkills/defense/deflection.json');
+      const deflection = await deflectionResponse.json();
+      this.validateSkill(deflection);
+      this.skills.set('deflection', deflection);
 
       console.log('[GameEngine] Loaded skills:', Array.from(this.skills.keys()));
       this.log(`Loaded ${this.skills.size} combat skills`);
@@ -287,6 +302,49 @@ export class GameEngine {
     const elapsed = action.elapsedTime;
     const prevPhase = action.currentPhase;
 
+    // DEFENSE SKILLS: windUp → active → recovery
+    if (skill.type === 'defense') {
+      const windUpEnd = skill.phases.windUp.duration;
+      const activeDuration = skill.phases.active?.duration || 0;
+      const activeEnd = windUpEnd + activeDuration;
+      const recoveryEnd = activeEnd + skill.phases.recovery.duration;
+
+      let newPhase: typeof action.currentPhase = action.currentPhase;
+
+      if (elapsed < windUpEnd) {
+        newPhase = 'windUp';
+        action.canCancel = skill.phases.windUp.canCancel;
+        action.canFeint = skill.phases.windUp.canFeint;
+      } else if (elapsed < activeEnd) {
+        newPhase = 'active';
+        action.canCancel = false;
+        action.canFeint = false;
+      } else if (elapsed < recoveryEnd) {
+        newPhase = 'recovery';
+        action.canCancel = false;
+        action.canFeint = false;
+      } else {
+        // Action complete, clear it
+        this.log(`${fighter.name} completed ${skill.name}`);
+        fighter.currentAction = null;
+        return;
+      }
+
+      // Update phase and emit event if changed
+      if (newPhase !== prevPhase) {
+        action.currentPhase = newPhase;
+        this.log(`${fighter.name} ${skill.name}: ${prevPhase} → ${newPhase}`);
+
+        this.emitEvent({
+          type: 'PHASE_CHANGED',
+          fighterId: fighter.id,
+          newPhase: newPhase,
+        });
+      }
+      return; // Exit early for defense skills
+    }
+
+    // ATTACK SKILLS: windUp → committed → impact → recovery
     // Calculate phase boundaries
     const windUpEnd = skill.phases.windUp.duration;
     const impactTick = skill.phases.impact.tick;
@@ -423,38 +481,28 @@ export class GameEngine {
 
   /**
    * Check if defender has active defense during attacker's impact
+   * All 4 defense types supported: Parry, Emergency Defense, Retreat, Deflection
    */
   private isDefenseActive(defender: FighterState, attackImpactTime: number): boolean {
     const defenseAction = defender.currentAction;
-    if (!defenseAction || defenseAction.skill.type !== 'defense') {
+    if (!defenseAction) return false;
+    if (defenseAction.skill.type !== 'defense') return false;
+
+    // Defense must be in active phase
+    if (defenseAction.currentPhase !== 'active') {
+      this.log(`${defender.name} defense not active: currently in ${defenseAction.currentPhase} phase`);
       return false;
     }
 
-    const skill = defenseAction.skill;
+    // Basic mode: Any defense in active phase blocks any attack
+    // Future: Check linePrediction for Parry, attackPrediction for Deflection
+    const defenseProps = defenseAction.skill.defenseProperties;
 
-    // For parry: check if in readiness window
-    if (skill.id === 'parry') {
-      // Read parry readinessWindow values from JSON
-      // @ts-ignore - readinessWindow not in PhaseTimings type
-      const readinessStart = skill.phases.readinessWindow?.startTick || 500;
-      // @ts-ignore
-      const readinessDuration = skill.phases.readinessWindow?.baseDuration || 400;
-      const defenseElapsed = defenseAction.elapsedTime;
+    this.log(
+      `${defender.name} ${defenseAction.skill.name} active (${defenseAction.elapsedTime}ms) - BLOCKS attack!`
+    );
 
-      // Defense is active if elapsed time is within readiness window
-      const inReadiness =
-        defenseElapsed >= readinessStart &&
-        defenseElapsed <= readinessStart + readinessDuration;
-
-      this.log(
-        `Parry check: elapsed=${defenseElapsed}ms, window=${readinessStart}-${readinessStart + readinessDuration}ms, active=${inReadiness}`
-      );
-
-      return inReadiness;
-    }
-
-    // TODO: Handle other defense types (dodge, etc.)
-    return false;
+    return true;
   }
 
   /**
@@ -510,7 +558,7 @@ export class GameEngine {
       if (telegraph.pause === true) {
         this.pauseState.isPaused = true;
         this.pauseState.reason = 'new_telegraph';
-        this.pauseState.availableActions = ['side_slash', 'thrust', 'overhead_strike', 'upward_strike', 'diagonal_slash', 'parry']; // TODO: Calculate based on time available
+        this.pauseState.availableActions = ['side_slash', 'thrust', 'overhead_strike', 'upward_strike', 'diagonal_slash', 'parry', 'emergency_defense', 'retreat', 'deflection']; // TODO: Calculate based on time available
 
         // Build prediction
         this.pauseState.prediction = {
