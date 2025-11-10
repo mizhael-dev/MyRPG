@@ -84,8 +84,11 @@ export function ActionPanel({ gameState, fighter, onExecuteSkill, onWait }: Acti
         <h3 className={`text-sm font-bold mb-2 ${fighter === 'pc' ? 'text-green-400' : 'text-red-400'}`}>{fighterLabel} Actions</h3>
 
         <div className="space-y-1">
-          {renderSkillButton('side_slash', '⚔️', 'bg-blue-600 hover:bg-blue-700')}
+          {renderSkillButton('side_slash', '➡️', 'bg-blue-600 hover:bg-blue-700')}
           {renderSkillButton('thrust', '🗡️', 'bg-blue-600 hover:bg-blue-700')}
+          {renderSkillButton('overhead_strike', '⬇️', 'bg-blue-600 hover:bg-blue-700')}
+          {renderSkillButton('upward_strike', '⬆️', 'bg-blue-600 hover:bg-blue-700')}
+          {renderSkillButton('diagonal_slash', '↘️', 'bg-blue-600 hover:bg-blue-700')}
           {renderSkillButton('parry', '🛡️', 'bg-green-600 hover:bg-green-700')}
 
           {/* Wait Button */}

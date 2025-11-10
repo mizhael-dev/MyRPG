@@ -95,7 +95,7 @@ export class GameEngine {
         maxDailyFatigue: 100,
       },
       currentAction: null,
-      availableSkills: ['side_slash', 'thrust', 'parry'], // Default skills
+      availableSkills: ['side_slash', 'thrust', 'overhead_strike', 'upward_strike', 'diagonal_slash', 'parry'], // Default skills
       hitsRemaining: 3, // Starts with 3 hits, clean hit = instant death (0), non-clean = -1
     };
   }
@@ -120,6 +120,21 @@ export class GameEngine {
       const thrust = await thrustResponse.json();
       this.validateSkill(thrust);
       this.skills.set('thrust', thrust);
+
+      const overheadResponse = await fetch('/CombatSkills/attacks/overhead_strike.json');
+      const overhead = await overheadResponse.json();
+      this.validateSkill(overhead);
+      this.skills.set('overhead_strike', overhead);
+
+      const upwardResponse = await fetch('/CombatSkills/attacks/upward_strike.json');
+      const upward = await upwardResponse.json();
+      this.validateSkill(upward);
+      this.skills.set('upward_strike', upward);
+
+      const diagonalResponse = await fetch('/CombatSkills/attacks/diagonal_slash.json');
+      const diagonal = await diagonalResponse.json();
+      this.validateSkill(diagonal);
+      this.skills.set('diagonal_slash', diagonal);
 
       // Load defense skills
       const parryResponse = await fetch('/CombatSkills/defense/parry.json');
@@ -495,7 +510,7 @@ export class GameEngine {
       if (telegraph.pause === true) {
         this.pauseState.isPaused = true;
         this.pauseState.reason = 'new_telegraph';
-        this.pauseState.availableActions = ['side_slash', 'thrust', 'parry']; // TODO: Calculate based on time available
+        this.pauseState.availableActions = ['side_slash', 'thrust', 'overhead_strike', 'upward_strike', 'diagonal_slash', 'parry']; // TODO: Calculate based on time available
 
         // Build prediction
         this.pauseState.prediction = {
@@ -617,6 +632,9 @@ export class GameEngine {
 
     this.log(`${fighter.name} begins ${skill.name}`);
     console.log(`[GameEngine] ${fighter.name} started ${skill.name}`);
+
+    // Check for initial telegraphs (triggerTime 0) immediately
+    this.updateTelegraphReveals(fighter);
 
     this.emitStateUpdate();
   }
