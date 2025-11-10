@@ -96,7 +96,6 @@ export class GameEngine {
       },
       currentAction: null,
       availableSkills: ['side_slash', 'thrust', 'overhead_strike', 'upward_strike', 'diagonal_slash', 'parry', 'emergency_defense', 'retreat', 'deflection'], // All skills
-      hitsRemaining: 3, // Starts with 3 hits, clean hit = instant death (0), non-clean = -1
     };
   }
 
@@ -518,27 +517,12 @@ export class GameEngine {
 
   /**
    * Check if fighter should die
+   * Death occurs when HP <= 0
    */
   private checkDeath(fighter: FighterState, reason: string): void {
-    let shouldDie = false;
-    let deathReason = '';
-
-    // Check hits remaining
-    if (fighter.hitsRemaining <= 0) {
-      shouldDie = true;
-      deathReason = reason === 'clean_hit'
-        ? 'Clean strike - instant death'
-        : `No hits remaining (${3 - fighter.hitsRemaining} hits taken)`;
-    }
-    // Check HP (from exhaustion, etc.)
-    else if (fighter.resources.hp <= 0) {
-      shouldDie = true;
-      deathReason = 'HP depleted';
-      fighter.hitsRemaining = 0;
-    }
-
-    if (shouldDie) {
-      this.log(`${fighter.name} died: ${deathReason}`);
+    // Check HP
+    if (fighter.resources.hp <= 0) {
+      this.log(`${fighter.name} died: ${reason}`);
 
       // Clear current action
       fighter.currentAction = null;
@@ -546,7 +530,7 @@ export class GameEngine {
       this.emitEvent({
         type: 'FIGHTER_DIED',
         fighterId: fighter.id,
-        reason: deathReason,
+        reason: reason,
       });
 
       // Pause combat

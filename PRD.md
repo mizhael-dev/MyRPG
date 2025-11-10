@@ -179,13 +179,28 @@ IMPORTANT: More detailed combat mechanics are documented in Combat3 series files
 
 **Note:** `<regeneration_rate>` is a variable that needs balancing through playtesting. Initial estimate: 1000ms (1 second), but will be adjusted based on combat pacing.
 
-##### **Damage System (First Prototype)**
+##### **Damage System (Current Implementation)**
 
-For the initial prototype, combat is extremely deadly:
-- **1 clean hit (successful attack with no defense) = instant death**
-- **3 hits of any kind (blocked, parried, or glancing) = death**
+HP-based damage system with defense reduction mechanics:
 
-This simplified system allows us to focus on the core atomic turn mechanics and telegraph reading without complex damage calculations. More sophisticated damage systems will be added later.
+**Core Stats:**
+- Both PC and NPC: **3 HP**
+- All attacks: **3 base damage**
+- Death condition: **HP <= 0**
+
+**Damage Formula:**
+```
+finalDamage = attackDamage * (1 - damageReductionPercent) - damageReductionFlat
+if finalDamage < 0 then finalDamage = 0
+```
+
+**Defense Damage Reduction:**
+- Emergency Defense: 2 flat reduction → 1 damage taken
+- Retreat: 100% reduction → 0 damage (full dodge)
+- Parry: 3 flat reduction → 0 damage
+- Deflection: 3 flat reduction → 0 damage
+
+This system allows for strategic defense choices and varying damage outcomes while keeping combat deadly and focused on timing/prediction. More sophisticated damage scaling and attribute-based modifications will be added later.
 
 ##### **Telegraph UI (Visual Design)**
 

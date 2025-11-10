@@ -295,10 +295,10 @@ The current code is a **skeleton**. Here's what still needs work:
    - Deduct costs when action starts
    - Check for exhaustion penalties
 
-6. **Death Conditions** - Nobody dies
-   - Check for 1 clean hit
-   - Check for 3 total hits
-   - Emit FIGHTER_DIED event
+6. **Death Conditions** - HP-based system
+   - Check if HP <= 0 after damage applied
+   - Emit FIGHTER_DIED event with reason
+   - Clear fighter's current action and pause combat
 
 ---
 

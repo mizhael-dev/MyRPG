@@ -133,9 +133,6 @@ export function CombatScene() {
                   <span className="text-gray-400">Focus:</span> {gameState.pc.resources.focus} /{' '}
                   {gameState.pc.maxResources.maxFocus}
                 </div>
-                <div>
-                  <span className="text-gray-400">Hits:</span> {gameState.pc.hitsRemaining} / 3
-                </div>
                 {gameState.pc.currentAction && (
                   <div className="mt-2 p-2 bg-green-900/30 rounded">
                     <div className="font-bold text-green-400 text-xs">
@@ -164,9 +161,6 @@ export function CombatScene() {
                 <div>
                   <span className="text-gray-400">Focus:</span> {gameState.npc.resources.focus} /{' '}
                   {gameState.npc.maxResources.maxFocus}
-                </div>
-                <div>
-                  <span className="text-gray-400">Hits:</span> {gameState.npc.hitsRemaining} / 3
                 </div>
                 {gameState.npc.currentAction && (
                   <div className="mt-2 p-2 bg-red-900/30 rounded">

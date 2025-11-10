@@ -69,7 +69,7 @@ export interface Telegraph {
  * Based on 4-layer resource system from PRD.md
  */
 export interface Resources {
-  hp: number;              // Hit points (1 clean hit = death, 3 hits = death)
+  hp: number;              // Hit points (character dies when HP <= 0)
   stamina: number;         // Physical energy
   mp: number;              // Magic points
   focus: number;           // Mental clarity
@@ -161,7 +161,6 @@ export interface FighterState {
   maxResources: MaxResources;
   currentAction: ActionState | null;  // What they're doing right now
   availableSkills: string[];          // Skill IDs they can use
-  hitsRemaining: number;              // Hits remaining (starts at 3, clean hit = 0, non-clean = -1)
 }
 
 // ============================================================================
