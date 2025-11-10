@@ -114,7 +114,8 @@ export interface DefenseProperties {
   requiresLine?: boolean;        // Parry needs line selection (horizontal/center/diagonal/high/low)
   requiresAttackId?: boolean;    // Deflection needs specific attack prediction
   defenseType: 'emergency' | 'movement' | 'deflection';
-  damageReduction: number;       // 0.0-1.0 (0.5 = 50% reduction, 1.0 = full block)
+  damageReductionFlat: number;   // Flat damage reduction in points (e.g., 2.00 = reduces 2 damage, 3.00 = reduces 3 damage)
+  damageReductionPercent: number; // Percentage damage reduction (e.g., 0.50 = 50% reduction, 1.00 = 100% block)
   counterSpeedBonus?: number;    // Ms reduction to next attack windUp (e.g., 100 for deflection)
 }
 

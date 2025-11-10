@@ -33,7 +33,8 @@ t4_pause,false,false,false,false
 requiresLine,false,false,true,false
 requiresAttackId,false,false,false,true
 defenseType,emergency,movement,deflection,deflection
-damageReduction,2,1.0,3,3
+damageReductionFlat,2.00,0.00,3.00,3.00
+damageReductionPercent,0.00,1.00,0.00,0.00
 counterSpeedBonus,0,0,100,300
 # Metadata
 weaponTypes,any,any,sword|axe|dagger|spear,sword|axe|dagger|spear

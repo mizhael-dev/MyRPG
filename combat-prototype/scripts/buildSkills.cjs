@@ -320,7 +320,8 @@ function buildDefenseSkill(skillId, csvData) {
       requiresLine: get('requiresLine') === 'true',
       requiresAttackId: get('requiresAttackId') === 'true',
       defenseType: get('defenseType'),
-      damageReduction: parseFloat(get('damageReduction')),
+      damageReductionFlat: parseFloat(get('damageReductionFlat')),
+      damageReductionPercent: parseFloat(get('damageReductionPercent')),
       counterSpeedBonus: parseInt(get('counterSpeedBonus')) || 0
     },
     metadata: {

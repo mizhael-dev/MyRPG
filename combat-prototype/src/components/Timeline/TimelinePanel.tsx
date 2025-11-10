@@ -15,12 +15,28 @@ interface TimelinePanelProps {
 
 export function TimelinePanel({ gameState }: TimelinePanelProps) {
   // Calculate progress for each timeline (0-100%)
+  // For attacks: use impact.tick, for defenses: use windUp + active + recovery
+  const calculateTotalDuration = (action: typeof gameState.pc.currentAction) => {
+    if (!action) return 1; // Avoid division by zero
+    const skill = action.skill;
+    if (skill.type === 'defense') {
+      // Defense: windUp + active + recovery
+      const windUp = skill.phases.windUp.duration;
+      const active = skill.phases.active?.duration || 0;
+      const recovery = skill.phases.recovery.duration;
+      return windUp + active + recovery;
+    } else {
+      // Attack: use impact tick
+      return skill.phases.impact.tick;
+    }
+  };
+
   const pcProgress = gameState.pc.currentAction
-    ? (gameState.pc.currentAction.elapsedTime / gameState.pc.currentAction.skill.phases.impact.tick) * 100
+    ? (gameState.pc.currentAction.elapsedTime / calculateTotalDuration(gameState.pc.currentAction)) * 100
     : 0;
 
   const npcProgress = gameState.npc.currentAction
-    ? (gameState.npc.currentAction.elapsedTime / gameState.npc.currentAction.skill.phases.impact.tick) * 100
+    ? (gameState.npc.currentAction.elapsedTime / calculateTotalDuration(gameState.npc.currentAction)) * 100
     : 0;
 
   return (

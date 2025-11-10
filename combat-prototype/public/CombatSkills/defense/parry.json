@@ -12,7 +12,7 @@
       "description": "Preparing defensive action"
     },
     "active": {
-      "duration": 500,
+      "duration": 1500,
       "description": "Defense is active and will trigger automatically"
     },
     "recovery": {
@@ -32,7 +32,8 @@
     "requiresLine": true,
     "requiresAttackId": false,
     "defenseType": "deflection",
-    "damageReduction": 3,
+    "damageReductionFlat": 3,
+    "damageReductionPercent": 0,
     "counterSpeedBonus": 100
   },
   "metadata": {
