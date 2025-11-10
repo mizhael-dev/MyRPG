@@ -4,10 +4,10 @@
  * 🎯 THIS IS YOUR FOCUS AREA
  *
  * This is where atomic turn-based combat happens. Read through this code
- * to understand how 100ms ticks drive the entire combat simulation.
+ * to understand how 50ms ticks drive the entire combat simulation.
  *
  * Key concepts:
- * - Atomic ticks (100ms intervals)
+ * - Atomic ticks (50ms intervals)
  * - Event-driven architecture (Engine → UI communication)
  * - Deterministic combat (no RNG, pure timing)
  */
@@ -25,7 +25,7 @@ import type {
  * Main Combat Engine
  *
  * Responsibilities:
- * 1. Run atomic tick loop (100ms intervals)
+ * 1. Run atomic tick loop (50ms intervals)
  * 2. Update both fighters each tick
  * 3. Check for pause triggers
  * 4. Emit events to UI
@@ -38,7 +38,7 @@ export class GameEngine {
 
   private currentTick: number = 0;          // Current time in milliseconds
   private isRunning: boolean = false;       // Is the simulation running?
-  private tickInterval: number = 100;       // Atomic tick size (ms)
+  private tickInterval: number = 50;        // Atomic tick size (ms)
   private intervalId: number | null = null; // setInterval ID
 
   private pc: FighterState;                 // Player Character
@@ -180,6 +180,13 @@ export class GameEngine {
           `Invalid skill "${skill.id}": impact tick (${impactTick}) must equal windUp (${windUp}) + committed (${committed}) = ${windUp + committed}`
         );
       }
+
+      // Validate that impact tick is aligned with game tick interval
+      if (impactTick % this.tickInterval !== 0) {
+        throw new Error(
+          `Invalid skill "${skill.id}": impact tick (${impactTick}) must be a multiple of tick interval (${this.tickInterval}ms). Use ${Math.floor(impactTick / this.tickInterval) * this.tickInterval} or ${Math.ceil(impactTick / this.tickInterval) * this.tickInterval}`
+        );
+      }
     }
   }
 
@@ -190,7 +197,7 @@ export class GameEngine {
   /**
    * Start the combat simulation
    *
-   * This begins the atomic tick loop that runs every 100ms
+   * This begins the atomic tick loop that runs every 50ms
    */
   public start(): void {
     if (this.isRunning) {
