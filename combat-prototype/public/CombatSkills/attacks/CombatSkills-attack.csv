@@ -33,7 +33,7 @@ t4_description,Brief pause at apex blade perfectly vertical,Hips reach maximum c
 t4_pause,false,false,false,false,false
 # Damage
 damage_type,slashing,slashing,piercing,slashing,slashing
-damage_baseValue,1,1,1,1,1
+damage_baseValue,3,3,3,3,3
 # Metadata
 weaponTypes,sword|axe,sword|axe|dagger,sword|spear|dagger,sword,sword|axe
 tags,basic|melee|vertical,basic|melee|horizontal,basic|melee|piercing|fast,basic|melee|rising,versatile|melee|slashing|angled

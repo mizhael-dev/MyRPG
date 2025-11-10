@@ -12,7 +12,7 @@
       "description": "Preparing defensive action"
     },
     "active": {
-      "duration": 1500,
+      "duration": 400,
       "description": "Defense is active and will trigger automatically"
     },
     "recovery": {

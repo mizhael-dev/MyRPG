@@ -81,14 +81,14 @@ export class GameEngine {
       id,
       name,
       resources: {
-        hp: 10,
+        hp: 3,
         stamina: 20,  // Constitution × 2
         mp: 20,       // Magic × 2
         focus: 20,    // Willpower
         dailyFatigue: 100, // Willpower × 5
       },
       maxResources: {
-        maxHp: 10,
+        maxHp: 3,
         maxStamina: 20,
         maxMp: 20,
         maxFocus: 20,
@@ -429,6 +429,8 @@ export class GameEngine {
 
   /**
    * Resolve impact when attack reaches Impact tick
+   * Damage formula: attackDamage * (1 - damageReductionPercent) - damageReductionFlat
+   * If damage < 0, then damage = 0
    */
   private resolveImpact(attacker: FighterState): void {
     const action = attacker.currentAction;
@@ -439,12 +441,28 @@ export class GameEngine {
 
     this.log(`${attacker.name} ${action.skill.name} Impact!`);
 
+    // Get base attack damage
+    const baseDamage = action.skill.damage?.baseValue || 0;
+    let finalDamage = baseDamage;
+
     // Check if defender has active defense
     const defenseActive = this.isDefenseActive(defender, action.elapsedTime);
 
-    if (defenseActive) {
-      // Perfect block - no damage, no hit counted
-      this.log(`${defender.name} blocked the attack!`);
+    if (defenseActive && defender.currentAction) {
+      // Defense is active - apply damage reduction
+      const defenseProps = defender.currentAction.skill.defenseProperties;
+      if (defenseProps) {
+        const percentReduction = defenseProps.damageReductionPercent || 0;
+        const flatReduction = defenseProps.damageReductionFlat || 0;
+
+        // Apply damage formula: damage * (1 - percent) - flat
+        finalDamage = baseDamage * (1 - percentReduction) - flatReduction;
+
+        // Ensure damage doesn't go below 0
+        if (finalDamage < 0) finalDamage = 0;
+
+        this.log(`${defender.name} ${defender.currentAction.skill.name} reduces damage: ${baseDamage} → ${finalDamage}`);
+      }
 
       // Apply parry stamina cost if applicable
       if (defender.currentAction?.skill.id === 'parry') {
@@ -453,29 +471,22 @@ export class GameEngine {
         defender.resources.stamina -= additionalCost;
         this.log(`${defender.name} parry cost: ${additionalCost.toFixed(1)} stamina`);
       }
+    }
 
-      this.emitEvent({
-        type: 'IMPACT_RESOLVED',
-        attacker: attacker.id,
-        defender: defender.id,
-        hit: false,
-      });
-    } else {
-      // Clean hit - no defense active
-      this.log(`${attacker.name} CLEAN HIT on ${defender.name}!`);
+    // Apply damage to HP
+    defender.resources.hp -= finalDamage;
+    this.log(`${defender.name} takes ${finalDamage} damage (HP: ${defender.resources.hp}/${defender.maxResources.maxHp})`);
 
-      // Clean strike: instant death (3 → 0)
-      defender.hitsRemaining = 0;
+    this.emitEvent({
+      type: 'IMPACT_RESOLVED',
+      attacker: attacker.id,
+      defender: defender.id,
+      hit: finalDamage > 0,
+    });
 
-      this.emitEvent({
-        type: 'IMPACT_RESOLVED',
-        attacker: attacker.id,
-        defender: defender.id,
-        hit: true,
-      });
-
-      // Check for death
-      this.checkDeath(defender, 'clean_hit');
+    // Check for death (HP <= 0)
+    if (defender.resources.hp <= 0) {
+      this.checkDeath(defender, 'hp_depleted');
     }
   }
 
