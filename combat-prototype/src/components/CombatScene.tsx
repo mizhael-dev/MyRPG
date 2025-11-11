@@ -117,6 +117,36 @@ export function CombatScene() {
     });
   };
 
+  // Helper: Extract tick time from log entry (format: [XXXXms])
+  const extractTickTime = (entry: string): number => {
+    const match = entry.match(/\[(\d+)ms\]/);
+    return match ? parseInt(match[1]) : 0;
+  };
+
+  // Helper: Render combat log entry with highlighting and color coding
+  const renderLogEntry = (entry: string, isRecent: boolean) => {
+    // Color code fighter names
+    let coloredEntry = entry.replace(
+      /Mizhael/g,
+      '<span class="text-blue-400 font-semibold">Mizhael</span>'
+    );
+    coloredEntry = coloredEntry.replace(
+      /Bandit/g,
+      '<span class="text-red-400 font-semibold">Bandit</span>'
+    );
+
+    const className = isRecent
+      ? 'text-gray-100 text-base font-semibold'
+      : 'text-gray-300';
+
+    return (
+      <div
+        className={className}
+        dangerouslySetInnerHTML={{ __html: coloredEntry }}
+      />
+    );
+  };
+
   if (!gameState) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-900 text-white">
@@ -176,12 +206,9 @@ export function CombatScene() {
 
         {/* Center Column: Main Content */}
         <div className="flex-1 space-y-4">
-          {/* Timeline Visualization */}
-          <TimelinePanel gameState={gameState} viewMode={viewMode} />
-
           {/* Combat Log */}
-          <div className="bg-gray-800 rounded p-4">
-            <h3 className="text-lg font-bold mb-2">
+          <div className="bg-gray-800 rounded px-4 py-2">
+            <h3 className="text-lg font-bold mb-1">
               Combat Log
               {viewMode !== 'debug' && (
                 <span className="text-xs text-gray-500 ml-2">
@@ -190,16 +217,24 @@ export function CombatScene() {
               )}
             </h3>
             <div className="space-y-1 font-mono text-sm max-h-40 overflow-y-auto">
-              {getFilteredCombatLog()
-                .slice()
-                .reverse()
-                .map((entry, i) => (
-                  <div key={i} className="text-gray-300">
-                    {entry}
-                  </div>
-                ))}
+              {(() => {
+                const filteredLog = getFilteredCombatLog();
+                const maxTickTime = Math.max(...filteredLog.map(extractTickTime));
+
+                return filteredLog
+                  .slice()
+                  .reverse()
+                  .map((entry, i) => {
+                    const tickTime = extractTickTime(entry);
+                    const isRecent = tickTime === maxTickTime && maxTickTime > 0;
+                    return <div key={i}>{renderLogEntry(entry, isRecent)}</div>;
+                  });
+              })()}
             </div>
           </div>
+
+          {/* Timeline Visualization */}
+          <TimelinePanel gameState={gameState} viewMode={viewMode} />
 
           {/* Fighter States */}
           <div className="grid grid-cols-2 gap-4">
