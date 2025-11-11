@@ -7,15 +7,17 @@
  */
 
 import type { GameState } from '../../types/CombatTypes';
+import type { ViewMode } from '../ViewModeSelector';
 
 interface ActionPanelProps {
   gameState: GameState;
   fighter: 'pc' | 'npc';
+  viewMode: ViewMode;
   onExecuteSkill: (skillId: string) => void;
   onWait: () => void;
 }
 
-export function ActionPanel({ gameState, fighter, onExecuteSkill, onWait }: ActionPanelProps) {
+export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onWait }: ActionPanelProps) {
   const currentFighter = gameState[fighter];
   const opponent = fighter === 'pc' ? gameState.npc : gameState.pc;
   const canAct = !currentFighter.currentAction;
