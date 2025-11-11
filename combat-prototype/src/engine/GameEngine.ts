@@ -38,6 +38,7 @@ export class GameEngine {
 
   private currentTick: number = 0;          // Current time in milliseconds
   private isRunning: boolean = false;       // Is the simulation running?
+  private ticksStarted: boolean = false;    // Has the tick interval started?
   private tickInterval: number = 50;        // Atomic tick size (ms)
   private intervalId: number | null = null; // setInterval ID
 
@@ -499,19 +500,37 @@ export class GameEngine {
   /**
    * Check if defender has active defense during attacker's impact
    * All 4 defense types supported: Parry, Emergency Defense, Retreat, Deflection
+   *
+   * IMPORTANT: This checks if the defense's active window overlaps with the attack's impact tick,
+   * not just if the defense is currently in the active phase.
    */
   private isDefenseActive(defender: FighterState, attackImpactTime: number): boolean {
     const defenseAction = defender.currentAction;
     if (!defenseAction) return false;
     if (defenseAction.skill.type !== 'defense') return false;
 
-    // Defense must be in active phase
-    if (defenseAction.currentPhase !== 'active') {
-      this.log(`${defender.name} defense not active: currently in ${defenseAction.currentPhase} phase`);
+    // Calculate the defense's active window time range
+    const skill = defenseAction.skill;
+    const windUpEnd = skill.phases.windUp.duration;
+    const activeStart = windUpEnd;
+    const activeDuration = skill.phases.active?.duration || 0;
+    const activeEnd = activeStart + activeDuration;
+
+    // Check if the attack's impact falls within the defense's active window
+    const defenseElapsed = defenseAction.elapsedTime;
+    const defenseActiveStart = activeStart;
+    const defenseActiveEnd = activeEnd;
+
+    // The defense is active if: defenseActiveStart <= impact tick < defenseActiveEnd
+    // We need to check this relative to when the defense action started
+    const isInActiveWindow = defenseElapsed >= defenseActiveStart && defenseElapsed < defenseActiveEnd;
+
+    if (!isInActiveWindow) {
+      this.log(`${defender.name} defense not in active window: elapsed=${defenseElapsed}ms, active window=${defenseActiveStart}-${defenseActiveEnd}ms`);
       return false;
     }
 
-    // Basic mode: Any defense in active phase blocks any attack
+    // Basic mode: Any defense in active window blocks any attack
     // Future: Check linePrediction for Parry, attackPrediction for Deflection
     const defenseProps = defenseAction.skill.defenseProperties;
 
