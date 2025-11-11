@@ -515,7 +515,7 @@ export class GameEngine {
    * IMPORTANT: This checks if the defense's active window overlaps with the attack's impact tick,
    * not just if the defense is currently in the active phase.
    */
-  private isDefenseActive(defender: FighterState, attackImpactTime: number): boolean {
+  private isDefenseActive(defender: FighterState, _attackImpactTime: number): boolean {
     const defenseAction = defender.currentAction;
     if (!defenseAction) return false;
     if (defenseAction.skill.type !== 'defense') return false;
@@ -605,7 +605,7 @@ export class GameEngine {
    * Check if combat should auto-pause based on telegraph.pause field
    */
   private checkAutoPause(
-    fighter: FighterState,
+    _fighter: FighterState,
     reason: 'new_telegraph',
     telegraph?: any
   ): void {

@@ -29,16 +29,21 @@ interface ActionPanelProps {
   onWait: () => void;
 }
 
-export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onExecuteSkillWithPredictions, onExecuteFeint, onWait }: ActionPanelProps) {
+export function ActionPanel({ gameState, fighter, onExecuteSkill, onExecuteSkillWithPredictions, onExecuteFeint, onWait }: ActionPanelProps) {
   const currentFighter = gameState[fighter];
   const canAct = !currentFighter.currentAction;
-  const fighterColor = fighter === 'pc' ? 'green' : 'red';
   const fighterLabel = fighter === 'pc' ? 'PC' : 'NPC';
 
   // UI state for modals
   const [showLineSelection, setShowLineSelection] = useState(false);
   const [showAttackPrediction, setShowAttackPrediction] = useState(false);
   const [showFeintSelection, setShowFeintSelection] = useState(false);
+
+  // UI state for hover tooltips
+  const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [showFeintTooltip, setShowFeintTooltip] = useState(false);
+  const [feintTooltipPosition, setFeintTooltipPosition] = useState({ x: 0, y: 0 });
 
   // Helper to get opponent's attacks
   const getOpponentAttacks = (): CombatSkill[] => {
@@ -66,54 +71,125 @@ export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onEx
                    gameState.pauseState.isPaused &&
                    gameState.pauseState.reason === 'new_telegraph';
 
+  // Helper function to convert ms to seconds with 1 decimal place
+  const msToSeconds = (ms: number): string => {
+    return (ms / 1000).toFixed(1);
+  };
+
   // Helper function to render skill button with dynamic timings
   const renderSkillButton = (skillId: string, icon: string, colorClass: string, onClick?: () => void) => {
     const skill = gameState.loadedSkills.get(skillId);
     if (!skill) return null;
 
     const phases = skill.phases;
-    let timingText = '';
-    let impactText = '';
+    const staminaCost = skill.costs.stamina.base;
+
+    // Calculate timing info for display
+    let timingDisplay = '';
+    let tooltipData: { label: string; value: string; color: string }[] = [];
 
     if (skill.type === 'attack') {
-      // Calculate phase boundaries using tick for impact
-      const windUpEnd = phases.windUp.duration;
+      // Attack: Show "Attack time: {impactTick}s"
       const impactTick = phases.impact.tick;
-      const recoveryEnd = impactTick + phases.recovery.duration;
+      timingDisplay = `Attack time: ${msToSeconds(impactTick)}s`;
 
-      impactText = `Impact: ${impactTick}ms`;
-      timingText = `Wind: 0-${windUpEnd} · Commit: ${windUpEnd}-${impactTick} · Recov: ${impactTick}-${recoveryEnd}`;
+      // Tooltip data
+      const windUpDuration = phases.windUp.duration;
+      const committedDuration = phases.committed.duration;
+      const recoveryDuration = phases.recovery.duration;
+
+      tooltipData = [
+        { label: 'Wind up:', value: `${msToSeconds(windUpDuration)}s`, color: '#84db90' },
+        { label: 'Committed:', value: `${msToSeconds(committedDuration)}s`, color: '#ffc824' },
+        { label: 'Impact:', value: `at ${msToSeconds(impactTick)}s`, color: '#d9d9d9' },
+        { label: 'Recovery:', value: `${msToSeconds(recoveryDuration)}s`, color: '#db5a5a' },
+      ];
     } else if (skill.type === 'defense') {
-      // Defense phase flow: windUp → active → recovery
+      // Defense: Show "Defense window: {activeStart}s-{activeEnd}s"
       const windUpEnd = phases.windUp.duration;
       const activeStart = windUpEnd;
       const activeDuration = phases.active?.duration || 0;
       const activeEnd = activeStart + activeDuration;
-      const recoveryEnd = activeEnd + phases.recovery.duration;
 
-      impactText = `Active: ${activeStart}-${activeEnd}ms`;
-      timingText = `Wind: 0-${windUpEnd} · Active: ${activeStart}-${activeEnd} · Recov: ${activeEnd}-${recoveryEnd}`;
+      timingDisplay = `Defense window: ${msToSeconds(activeStart)}s-${msToSeconds(activeEnd)}s`;
+
+      // Tooltip data
+      const windUpDuration = phases.windUp.duration;
+      const recoveryDuration = phases.recovery.duration;
+
+      tooltipData = [
+        { label: 'Wind up:', value: `${msToSeconds(windUpDuration)}s`, color: '#84db90' },
+        { label: 'Active:', value: `${msToSeconds(activeDuration)}s`, color: '#ffc824' },
+        { label: 'Recovery:', value: `${msToSeconds(recoveryDuration)}s`, color: '#db5a5a' },
+      ];
     }
 
+    const handleMouseEnter = (e: React.MouseEvent) => {
+      setHoveredSkill(skillId);
+      setTooltipPosition({ x: e.clientX, y: e.clientY });
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+      if (hoveredSkill === skillId) {
+        setTooltipPosition({ x: e.clientX, y: e.clientY });
+      }
+    };
+
+    const handleMouseLeave = () => {
+      setHoveredSkill(null);
+    };
+
     return (
-      <button
-        onClick={onClick || (() => onExecuteSkill(skillId))}
-        disabled={!canAct}
-        className={`w-full px-2 py-2 rounded text-sm transition-all ${
-          canAct
-            ? `${colorClass} cursor-pointer`
-            : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-        }`}
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-base">{icon}</span>
-          <span className="font-semibold">{skill.name}</span>
-          <span className="ml-auto opacity-75">{impactText}</span>
-        </div>
-        <div className="text-xs opacity-60 mt-0.5 font-mono">
-          {timingText}
-        </div>
-      </button>
+      <>
+        <button
+          onClick={onClick || (() => onExecuteSkill(skillId))}
+          disabled={!canAct}
+          onMouseEnter={handleMouseEnter}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          className={`w-full px-3 py-1 rounded transition-all relative flex items-center gap-3 ${
+            canAct
+              ? `${colorClass} cursor-pointer`
+              : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          {/* Icon - 2x bigger, left-aligned, vertically centered */}
+          <div className="flex-shrink-0">
+            <span className="text-3xl">{icon}</span>
+          </div>
+
+          {/* Skill name and info container - aligned to left */}
+          <div className="flex flex-col items-start flex-1">
+            <div className="font-bold text-base leading-tight text-left">{skill.name}</div>
+            <div className="text-xs text-white/90 mt-0.5 text-left">
+              {timingDisplay}
+            </div>
+            <div className="text-xs text-white/80 text-left">
+              Stamina Cost: {staminaCost}
+            </div>
+          </div>
+        </button>
+
+        {/* Tooltip */}
+        {hoveredSkill === skillId && canAct && (
+          <div
+            className="fixed pointer-events-none z-[10000] bg-gray-900/95 rounded-lg border border-gray-700 px-3 py-2 shadow-lg"
+            style={{
+              left: `${tooltipPosition.x + 15}px`,
+              top: `${tooltipPosition.y + 15}px`,
+            }}
+          >
+            {tooltipData.map((item, index) => (
+              <div key={index} className="text-sm whitespace-nowrap mb-1 last:mb-0">
+                <span style={{ color: item.color }} className="font-semibold">
+                  {item.label}
+                </span>{' '}
+                <span className="text-white">{item.value}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </>
     );
   };
 
@@ -128,14 +204,24 @@ export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onEx
           <button
             onClick={onWait}
             disabled={!gameState.pauseState.isPaused || gameState.pauseState.reason !== 'new_telegraph'}
-            className={`w-full px-2 py-2 rounded text-sm transition-all flex items-center gap-2 mb-2 ${
+            className={`w-full px-3 py-1 rounded transition-all relative flex items-center gap-3 ${
               gameState.pauseState.isPaused && gameState.pauseState.reason === 'new_telegraph'
                 ? 'bg-gray-600 hover:bg-gray-700 cursor-pointer'
                 : 'bg-gray-700 text-gray-500 cursor-not-allowed'
             }`}
           >
-            <span className="text-base">⏸️</span>
-            <span className="font-semibold">Wait</span>
+            {/* Icon - 2x bigger, left-aligned, vertically centered */}
+            <div className="flex-shrink-0">
+              <span className="text-3xl">⏸️</span>
+            </div>
+
+            {/* Skill name and info container - aligned to left */}
+            <div className="flex flex-col items-start flex-1">
+              <div className="font-bold text-base leading-tight text-left">Wait</div>
+              <div className="text-xs text-white/90 mt-0.5 text-left">
+                Pass your turn
+              </div>
+            </div>
           </button>
 
           {renderSkillButton('emergency_defense', '🚨', 'bg-yellow-600 hover:bg-yellow-700')}
@@ -144,21 +230,62 @@ export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onEx
           <button
             onClick={() => setShowFeintSelection(true)}
             disabled={!canFeint}
-            className={`w-full px-2 py-2 rounded text-sm transition-all ${
+            onMouseEnter={(e) => {
+              setShowFeintTooltip(true);
+              setFeintTooltipPosition({ x: e.clientX, y: e.clientY });
+            }}
+            onMouseMove={(e) => {
+              if (showFeintTooltip) {
+                setFeintTooltipPosition({ x: e.clientX, y: e.clientY });
+              }
+            }}
+            onMouseLeave={() => setShowFeintTooltip(false)}
+            className={`w-full px-3 py-1 rounded transition-all relative flex items-center gap-3 ${
               canFeint
                 ? 'bg-pink-600 hover:bg-pink-700 cursor-pointer'
                 : 'bg-gray-700 text-gray-500 cursor-not-allowed'
             }`}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-base">⚡</span>
-              <span className="font-semibold">Feint</span>
-              <span className="ml-auto opacity-75 text-xs">Change Attack</span>
+            {/* Icon - 2x bigger, left-aligned, vertically centered */}
+            <div className="flex-shrink-0">
+              <span className="text-3xl">⚡</span>
             </div>
-            <div className="text-xs opacity-60 mt-0.5 font-mono">
-              Cost: 1.4× stamina + 3 focus • +100ms delay
+
+            {/* Skill name and info container - aligned to left */}
+            <div className="flex flex-col items-start flex-1">
+              <div className="font-bold text-base leading-tight text-left">Feint</div>
+              <div className="text-xs text-white/90 mt-0.5 text-left">
+                Change attack line
+              </div>
+              <div className="text-xs text-white/80 text-left">
+                Cost: 1.4× stamina + 3 focus
+              </div>
             </div>
           </button>
+
+          {/* Feint Tooltip */}
+          {showFeintTooltip && canFeint && (
+            <div
+              className="fixed pointer-events-none z-[10000] bg-gray-900/95 rounded-lg border border-gray-700 px-3 py-2 shadow-lg"
+              style={{
+                left: `${feintTooltipPosition.x + 15}px`,
+                top: `${feintTooltipPosition.y + 15}px`,
+              }}
+            >
+              <div className="text-sm whitespace-nowrap mb-1">
+                <span style={{ color: '#ffc824' }} className="font-semibold">
+                  Adjustment time:
+                </span>{' '}
+                <span className="text-white">0.1s</span>
+              </div>
+              <div className="text-sm whitespace-nowrap">
+                <span style={{ color: '#db5a5a' }} className="font-semibold">
+                  Time penalty:
+                </span>{' '}
+                <span className="text-white">+0.1s</span>
+              </div>
+            </div>
+          )}
 
           {renderSkillButton('side_slash', '➡️', 'bg-blue-600 hover:bg-blue-700')}
           {renderSkillButton('thrust', '🗡️', 'bg-blue-600 hover:bg-blue-700')}
