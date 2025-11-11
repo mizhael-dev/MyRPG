@@ -11,7 +11,10 @@
       "Bash(del \"Overhead Strike.json\" \"Horizontal Strike.json\" \"Upward Strike.json\" \"Diagonal Slash.json\")",
       "Bash(timeout:*)",
       "Bash(ping:*)",
-      "Bash(nul)"
+      "Bash(nul)",
+      "Bash(npm run build:*)",
+      "Bash(Get-Date -Format \"yyyyMMdd\")",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

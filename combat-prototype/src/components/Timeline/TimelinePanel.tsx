@@ -42,8 +42,8 @@ export function TimelinePanel({ gameState, viewMode }: TimelinePanelProps) {
     : 0;
 
   return (
-    <div className="bg-gray-800 rounded p-4 space-y-2">
-      <h3 className="text-lg font-bold mb-2">
+    <div className="bg-gray-800 rounded px-4 py-2 space-y-2">
+      <h3 className="text-lg font-bold mb-1">
         Combat Timelines
         {viewMode !== 'debug' && (
           <span className="text-xs text-gray-500 ml-2">

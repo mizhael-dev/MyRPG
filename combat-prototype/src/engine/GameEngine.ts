@@ -64,8 +64,8 @@ export class GameEngine {
     console.log('[GameEngine] Initializing combat engine...');
 
     // Initialize fighters with default state
-    this.pc = this.createFighter('pc', 'Player');
-    this.npc = this.createFighter('npc', 'Opponent');
+    this.pc = this.createFighter('pc', 'Mizhael');
+    this.npc = this.createFighter('npc', 'Bandit');
 
     this.log('Combat engine initialized');
   }
@@ -198,7 +198,7 @@ export class GameEngine {
   /**
    * Start the combat simulation
    *
-   * This begins the atomic tick loop that runs every 50ms
+   * Combat is now ready, but the tick loop won't start until the first action is taken
    */
   public start(): void {
     if (this.isRunning) {
@@ -206,15 +206,13 @@ export class GameEngine {
       return;
     }
 
-    console.log('[GameEngine] Starting combat simulation...');
+    console.log('[GameEngine] Combat ready (waiting for first action)...');
     this.isRunning = true;
 
-    // Run tick() every 100ms
-    this.intervalId = window.setInterval(() => {
-      this.tick();
-    }, this.tickInterval);
+    // Don't start the interval yet - wait for first action
+    // The tick loop will start when executeSkill() is called
 
-    this.log('Combat started');
+    this.log('Combat ready - awaiting first action');
     this.emitStateUpdate();
   }
 
@@ -226,6 +224,7 @@ export class GameEngine {
 
     console.log('[GameEngine] Stopping combat simulation...');
     this.isRunning = false;
+    this.ticksStarted = false;
 
     if (this.intervalId !== null) {
       clearInterval(this.intervalId);
@@ -701,6 +700,18 @@ export class GameEngine {
 
     this.log(`${fighter.name} begins ${skill.name}`);
     console.log(`[GameEngine] ${fighter.name} started ${skill.name}`);
+
+    // Start the tick interval on first action
+    if (!this.ticksStarted && this.isRunning) {
+      this.ticksStarted = true;
+      console.log('[GameEngine] Starting tick interval (first action taken)...');
+      this.log('Combat timing started');
+
+      // Start the interval timer
+      this.intervalId = window.setInterval(() => {
+        this.tick();
+      }, this.tickInterval);
+    }
 
     // Check for initial telegraphs (triggerTime 0) immediately
     this.updateTelegraphReveals(fighter);
