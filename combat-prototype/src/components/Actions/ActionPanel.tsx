@@ -84,6 +84,15 @@ export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onWa
         <h3 className={`text-sm font-bold mb-2 ${fighter === 'pc' ? 'text-green-400' : 'text-red-400'}`}>{fighterLabel} Actions</h3>
 
         <div className="space-y-1">
+          {/* Wait Button - Top position for easy access */}
+          <button
+            onClick={onWait}
+            className="w-full px-2 py-2 rounded text-sm transition-all flex items-center gap-2 bg-gray-600 hover:bg-gray-700 cursor-pointer mb-2"
+          >
+            <span className="text-base">⏸️</span>
+            <span className="font-semibold">Wait</span>
+          </button>
+
           {renderSkillButton('side_slash', '➡️', 'bg-blue-600 hover:bg-blue-700')}
           {renderSkillButton('thrust', '🗡️', 'bg-blue-600 hover:bg-blue-700')}
           {renderSkillButton('overhead_strike', '⬇️', 'bg-blue-600 hover:bg-blue-700')}
@@ -93,15 +102,6 @@ export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onWa
           {renderSkillButton('emergency_defense', '🚨', 'bg-yellow-600 hover:bg-yellow-700')}
           {renderSkillButton('retreat', '↩️', 'bg-purple-600 hover:bg-purple-700')}
           {renderSkillButton('deflection', '⚔️', 'bg-orange-600 hover:bg-orange-700')}
-
-          {/* Wait Button */}
-          <button
-            onClick={onWait}
-            className="w-full px-2 py-2 rounded text-sm transition-all flex items-center gap-2 bg-gray-600 hover:bg-gray-700 cursor-pointer mt-2"
-          >
-            <span className="text-base">⏸️</span>
-            <span className="font-semibold">Wait</span>
-          </button>
         </div>
 
         {!canAct && currentFighter.currentAction && (
