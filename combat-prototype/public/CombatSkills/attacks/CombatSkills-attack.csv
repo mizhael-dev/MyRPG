@@ -35,7 +35,7 @@ t4_pause,true,true,true,true,true
 t5_triggerTime,800,1000,600,800,700
 t5_assetId,vertical_commit,horizontal_commit,thrust_commit,rising_commit,diagonal_commit
 t5_bodyPart,weapon,weapon,weapon,weapon,weapon
-t5_description,Weapon swings down with full force,Weapon swings tto the side with full force,Weapon thrusts forward with full force,Weapon swings up with full force,Weapon swings diagonally with full force
+t5_description,Weapon swings down with full force,Weapon swings to the side with full force,Weapon thrusts forward with full force,Weapon swings up with full force,Weapon swings diagonally with full force
 t5_pause,true,true,true,true,true
 # Damage
 damage_type,slashing,slashing,piercing,slashing,slashing

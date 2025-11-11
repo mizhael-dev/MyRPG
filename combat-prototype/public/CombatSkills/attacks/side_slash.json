@@ -73,7 +73,7 @@
       "assetId": "horizontal_commit",
       "bodyPart": "weapon",
       "triggerTime": 1000,
-      "description": "Weapon swings tto the side with full force",
+      "description": "Weapon swings to the side with full force",
       "pause": true
     }
   ],
