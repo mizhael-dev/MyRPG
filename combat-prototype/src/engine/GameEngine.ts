@@ -157,6 +157,12 @@ export class GameEngine {
       this.validateSkill(deflection);
       this.skills.set('deflection', deflection);
 
+      // Load special skills
+      const feintResponse = await fetch('/CombatSkills/special/feint.json');
+      const feint = await feintResponse.json();
+      this.validateSkill(feint);
+      this.skills.set('feint', feint);
+
       console.log('[GameEngine] Loaded skills:', Array.from(this.skills.keys()));
       this.log(`Loaded ${this.skills.size} combat skills`);
     } catch (error) {
@@ -795,6 +801,112 @@ export class GameEngine {
       type: 'PAUSE_TRIGGERED',
       pauseState: this.pauseState,
     });
+
+    this.emitStateUpdate();
+  }
+
+  /**
+   * Check if a fighter can execute a feint
+   *
+   * Feint requires:
+   * - Fighter has active attack in windUp phase
+   * - canFeint flag is true
+   * - Combat is paused due to opponent's telegraph
+   */
+  public canExecuteFeint(fighterId: string): boolean {
+    const fighter = fighterId === 'pc' ? this.pc : this.npc;
+
+    // Check if fighter has active attack
+    if (!fighter.currentAction || fighter.currentAction.skill.type !== 'attack') {
+      return false;
+    }
+
+    // Check if in windUp phase with canFeint enabled
+    if (fighter.currentAction.currentPhase !== 'windUp' || !fighter.currentAction.canFeint) {
+      return false;
+    }
+
+    // Check if paused due to opponent telegraph
+    if (!this.pauseState.isPaused || this.pauseState.reason !== 'new_telegraph') {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Execute a feint - cancel current attack and start new attack on different line
+   *
+   * Feint mechanics:
+   * - Costs 1.4x stamina of original attack + 3 focus + 3 daily fatigue
+   * - Adds 100ms time penalty to new attack windUp
+   * - Must change to different attack line
+   */
+  public executeFeint(fighterId: string, newAttackId: string): void {
+    console.log(`[GameEngine] ${fighterId} attempting feint to ${newAttackId}`);
+
+    const fighter = fighterId === 'pc' ? this.pc : this.npc;
+
+    // Validate feint is possible
+    if (!this.canExecuteFeint(fighterId)) {
+      console.error(`[GameEngine] Cannot execute feint - conditions not met`);
+      return;
+    }
+
+    const currentAction = fighter.currentAction;
+    if (!currentAction) return; // TypeScript guard
+
+    const newSkill = this.skills.get(newAttackId);
+    if (!newSkill || newSkill.type !== 'attack') {
+      console.error(`[GameEngine] Invalid feint target skill: ${newAttackId}`);
+      return;
+    }
+
+    // Verify different line
+    if (currentAction.skill.line === newSkill.line) {
+      console.error(`[GameEngine] Feint must change attack line (current: ${currentAction.skill.line}, new: ${newSkill.line})`);
+      this.log(`${fighter.name} feint FAILED - must change attack line`);
+      return;
+    }
+
+    // Calculate feint costs
+    const originalStamina = currentAction.skill.costs.stamina.base;
+    const feintStaminaCost = originalStamina * 1.4;
+    const feintFocusCost = 3;
+    const feintFatigueCost = 3;
+
+    // Deduct feint costs
+    fighter.resources.stamina -= feintStaminaCost;
+    fighter.resources.focus -= feintFocusCost;
+    fighter.resources.dailyFatigue -= feintFatigueCost;
+
+    this.log(
+      `${fighter.name} FEINTS from ${currentAction.skill.name} to ${newSkill.name} (cost: ${feintStaminaCost.toFixed(1)} stam, ${feintFocusCost} focus, ${feintFatigueCost} fatigue)`
+    );
+
+    // Clear counter bonus when using feint
+    if (fighter.activeCounterBonus) {
+      this.log(`${fighter.name} counter bonus cleared (unused)`);
+      fighter.activeCounterBonus = undefined;
+    }
+
+    // Create new action with 100ms time penalty (positive windUpModifier = slower)
+    fighter.currentAction = {
+      skillId: newAttackId,
+      skill: newSkill,
+      currentPhase: 'windUp',
+      elapsedTime: 0,
+      visibleTelegraphs: [],
+      canCancel: newSkill.phases.windUp.canCancel,
+      canFeint: newSkill.phases.windUp.canFeint,
+      windUpModifier: 100, // Positive = slower (100ms penalty)
+    };
+
+    this.log(`${fighter.name} begins ${newSkill.name} with 100ms feint penalty`);
+    console.log(`[GameEngine] ${fighter.name} feinted to ${newSkill.name}`);
+
+    // Check for initial telegraphs
+    this.updateTelegraphReveals(fighter);
 
     this.emitStateUpdate();
   }

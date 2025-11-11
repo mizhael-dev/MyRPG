@@ -11,6 +11,7 @@ import type { GameState, CombatSkill } from '../../types/CombatTypes';
 import type { ViewMode } from '../ViewModeSelector';
 import { LineSelectionModal } from './LineSelectionModal';
 import { AttackPredictionDropdown } from './AttackPredictionDropdown';
+import { FeintSelectionModal } from './FeintSelectionModal';
 
 interface ActionPanelProps {
   gameState: GameState;
@@ -24,10 +25,11 @@ interface ActionPanelProps {
       attackPrediction?: string;
     }
   ) => void;
+  onExecuteFeint: (newAttackId: string) => void;
   onWait: () => void;
 }
 
-export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onExecuteSkillWithPredictions, onWait }: ActionPanelProps) {
+export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onExecuteSkillWithPredictions, onExecuteFeint, onWait }: ActionPanelProps) {
   const currentFighter = gameState[fighter];
   const canAct = !currentFighter.currentAction;
   const fighterColor = fighter === 'pc' ? 'green' : 'red';
@@ -36,6 +38,7 @@ export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onEx
   // UI state for modals
   const [showLineSelection, setShowLineSelection] = useState(false);
   const [showAttackPrediction, setShowAttackPrediction] = useState(false);
+  const [showFeintSelection, setShowFeintSelection] = useState(false);
 
   // Helper to get opponent's attacks
   const getOpponentAttacks = (): CombatSkill[] => {
@@ -57,6 +60,11 @@ export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onEx
     // For now, return empty array (show all equally)
     return [];
   };
+
+  // Helper to check if feint is available
+  const canFeint = currentFighter.currentAction?.canFeint &&
+                   gameState.pauseState.isPaused &&
+                   gameState.pauseState.reason === 'new_telegraph';
 
   // Helper function to render skill button with dynamic timings
   const renderSkillButton = (skillId: string, icon: string, colorClass: string, onClick?: () => void) => {
@@ -116,13 +124,40 @@ export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onEx
         <h3 className={`text-sm font-bold mb-2 ${fighter === 'pc' ? 'text-green-400' : 'text-red-400'}`}>{fighterLabel} Actions</h3>
 
         <div className="space-y-1">
-          {/* Wait Button - Top position for easy access */}
+          {/* Wait Button - Only active when opponent action triggers pause */}
           <button
             onClick={onWait}
-            className="w-full px-2 py-2 rounded text-sm transition-all flex items-center gap-2 bg-gray-600 hover:bg-gray-700 cursor-pointer mb-2"
+            disabled={!gameState.pauseState.isPaused || gameState.pauseState.reason !== 'new_telegraph'}
+            className={`w-full px-2 py-2 rounded text-sm transition-all flex items-center gap-2 mb-2 ${
+              gameState.pauseState.isPaused && gameState.pauseState.reason === 'new_telegraph'
+                ? 'bg-gray-600 hover:bg-gray-700 cursor-pointer'
+                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+            }`}
           >
             <span className="text-base">⏸️</span>
             <span className="font-semibold">Wait</span>
+          </button>
+
+          {renderSkillButton('emergency_defense', '🚨', 'bg-yellow-600 hover:bg-yellow-700')}
+
+          {/* Feint Button - Only active during windUp when opponent pauses */}
+          <button
+            onClick={() => setShowFeintSelection(true)}
+            disabled={!canFeint}
+            className={`w-full px-2 py-2 rounded text-sm transition-all ${
+              canFeint
+                ? 'bg-pink-600 hover:bg-pink-700 cursor-pointer'
+                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-base">⚡</span>
+              <span className="font-semibold">Feint</span>
+              <span className="ml-auto opacity-75 text-xs">Change Attack</span>
+            </div>
+            <div className="text-xs opacity-60 mt-0.5 font-mono">
+              Cost: 1.4× stamina + 3 focus • +100ms delay
+            </div>
           </button>
 
           {renderSkillButton('side_slash', '➡️', 'bg-blue-600 hover:bg-blue-700')}
@@ -131,7 +166,6 @@ export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onEx
           {renderSkillButton('upward_strike', '⬆️', 'bg-blue-600 hover:bg-blue-700')}
           {renderSkillButton('diagonal_slash', '↘️', 'bg-blue-600 hover:bg-blue-700')}
           {renderSkillButton('parry', '🛡️', 'bg-green-600 hover:bg-green-700', () => setShowLineSelection(true))}
-          {renderSkillButton('emergency_defense', '🚨', 'bg-yellow-600 hover:bg-yellow-700')}
           {renderSkillButton('retreat', '↩️', 'bg-purple-600 hover:bg-purple-700')}
           {renderSkillButton('deflection', '⚔️', 'bg-orange-600 hover:bg-orange-700', () => setShowAttackPrediction(true))}
         </div>
@@ -174,6 +208,22 @@ export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onEx
             setShowAttackPrediction(false);
           }}
           onCancel={() => setShowAttackPrediction(false)}
+        />
+      )}
+
+      {/* Feint Selection Modal */}
+      {showFeintSelection && (
+        <FeintSelectionModal
+          isOpen={showFeintSelection}
+          availableAttacks={currentFighter.availableSkills
+            .map(id => gameState.loadedSkills.get(id))
+            .filter((skill): skill is CombatSkill => skill?.type === 'attack')}
+          currentAttackLine={currentFighter.currentAction?.skill.line}
+          onSelectAttack={(attackId) => {
+            onExecuteFeint(attackId);
+            setShowFeintSelection(false);
+          }}
+          onCancel={() => setShowFeintSelection(false)}
         />
       )}
     </div>

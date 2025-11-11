@@ -213,6 +213,7 @@ export function CombatScene() {
             onExecuteSkillWithPredictions={(skillId, predictions) =>
               engine.executeSkill('pc', skillId, predictions)
             }
+            onExecuteFeint={(newAttackId) => engine.executeFeint('pc', newAttackId)}
             onWait={() => {
               if (gameState.pauseState.isPaused) {
                 engine.togglePause();
@@ -414,6 +415,7 @@ export function CombatScene() {
             onExecuteSkillWithPredictions={(skillId, predictions) =>
               engine.executeSkill('npc', skillId, predictions)
             }
+            onExecuteFeint={(newAttackId) => engine.executeFeint('npc', newAttackId)}
             onWait={() => {
               if (gameState.pauseState.isPaused) {
                 engine.togglePause();
