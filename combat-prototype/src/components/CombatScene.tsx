@@ -82,8 +82,13 @@ export function CombatScene() {
         return false;
       }
 
-      // Always show: game state changes (paused, resumed, combat started)
-      if (entry.includes('paused') || entry.includes('resumed') || entry.includes('Combat started') || entry.includes('Combat ended')) {
+      // Hide "Combat resumed" in PC/NPC modes (only show in debug)
+      if (entry.includes('Combat resumed')) {
+        return false;
+      }
+
+      // Always show: game state changes (paused, combat started/ended)
+      if (entry.includes('paused') || entry.includes('Combat started') || entry.includes('Combat ended')) {
         return true;
       }
 
@@ -136,7 +141,7 @@ export function CombatScene() {
     );
 
     const className = isRecent
-      ? 'text-gray-100 text-base font-semibold'
+      ? 'text-gray-100 font-medium'
       : 'text-gray-300';
 
     return (
@@ -235,6 +240,67 @@ export function CombatScene() {
 
           {/* Timeline Visualization */}
           <TimelinePanel gameState={gameState} viewMode={viewMode} />
+
+          {/* Telegraph Stages Display */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* PC Telegraph Stages */}
+            <div className="bg-gray-800 rounded px-4 py-2">
+              <h3 className="text-sm font-bold mb-2 text-blue-400">
+                {gameState.pc.name} Telegraph Stages
+              </h3>
+              {gameState.pc.currentAction && gameState.pc.currentAction.skill.telegraphs.length > 0 ? (
+                <div className="space-y-1 text-xs">
+                  {gameState.pc.currentAction.skill.telegraphs.map((t, i) => (
+                    <div
+                      key={i}
+                      className={`p-1.5 rounded ${
+                        gameState.pc.currentAction!.visibleTelegraphs.some(vt => vt.stage === t.stage)
+                          ? 'bg-blue-900/40 text-blue-200 font-bold border border-blue-600'
+                          : 'bg-gray-700/50 text-gray-400'
+                      }`}
+                    >
+                      <div className="flex justify-between mb-0.5">
+                        <span className="font-semibold">Stage {t.stage}</span>
+                        <span className="font-mono">{t.triggerTime}ms</span>
+                      </div>
+                      <div className="text-xs opacity-75">{t.bodyPart}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-xs text-gray-500 italic">No active action</div>
+              )}
+            </div>
+
+            {/* NPC Telegraph Stages */}
+            <div className="bg-gray-800 rounded px-4 py-2">
+              <h3 className="text-sm font-bold mb-2 text-red-400">
+                {gameState.npc.name} Telegraph Stages
+              </h3>
+              {gameState.npc.currentAction && gameState.npc.currentAction.skill.telegraphs.length > 0 ? (
+                <div className="space-y-1 text-xs">
+                  {gameState.npc.currentAction.skill.telegraphs.map((t, i) => (
+                    <div
+                      key={i}
+                      className={`p-1.5 rounded ${
+                        gameState.npc.currentAction!.visibleTelegraphs.some(vt => vt.stage === t.stage)
+                          ? 'bg-red-900/40 text-red-200 font-bold border border-red-600'
+                          : 'bg-gray-700/50 text-gray-400'
+                      }`}
+                    >
+                      <div className="flex justify-between mb-0.5">
+                        <span className="font-semibold">Stage {t.stage}</span>
+                        <span className="font-mono">{t.triggerTime}ms</span>
+                      </div>
+                      <div className="text-xs opacity-75">{t.bodyPart}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-xs text-gray-500 italic">No active action</div>
+              )}
+            </div>
+          </div>
 
           {/* Fighter States */}
           <div className="grid grid-cols-2 gap-4">
