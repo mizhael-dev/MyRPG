@@ -32,7 +32,8 @@
     "requiresLine": false,
     "requiresAttackId": true,
     "defenseType": "deflection",
-    "damageReduction": 1,
+    "damageReductionFlat": 3,
+    "damageReductionPercent": 0,
     "counterSpeedBonus": 300
   },
   "metadata": {

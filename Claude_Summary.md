@@ -238,7 +238,7 @@ All resource regeneration now uses `<regeneration_rate>` terminology to avoid co
 ### ✅ Combat Skills - COMPLETED
 1. ~~**Telegraph definitions**~~ ✅ All telegraphs defined in JSON with bodyPart, triggerTime, visibility%, description
 2. ~~**More combat skills**~~ ✅ 5 attack skills + 3 defense skills + 2 special skills + 1 combo created
-3. ~~**Damage calculation**~~ ✅ Prototype damage system defined: 1 clean hit OR 3 hits = death
+3. ~~**Damage calculation**~~ ✅ HP-based damage system implemented: Characters have 3 HP, attacks deal 3 base damage, death at HP <= 0
 4. ~~**JSON Format**~~ ✅ All combat skills converted to JSON in `/CombatSkills/` folder
 
 ### 📋 Combat Skills Created:
@@ -334,15 +334,28 @@ Average duel exchange: **2.5-3 seconds**
 
 ---
 
-## DAMAGE SYSTEM (Prototype Version)
+## DAMAGE SYSTEM (Current Implementation)
 
-For the initial prototype, combat is extremely deadly to focus on core mechanics:
+HP-based damage system with defense reduction mechanics:
 
-**Death Conditions:**
-- **1 clean hit** (successful attack with no defense) = **instant death**
-- **3 hits of any kind** (blocked, parried, or glancing) = **death**
+**Core Stats:**
+- Both PC and NPC: **3 HP**
+- All attacks: **3 base damage**
+- Death condition: **HP <= 0**
 
-**Rationale:** Simplified system allows focus on atomic turn mechanics and telegraph reading without complex damage calculations. More sophisticated damage systems will be added later.
+**Damage Formula:**
+```
+finalDamage = attackDamage * (1 - damageReductionPercent) - damageReductionFlat
+if finalDamage < 0 then finalDamage = 0
+```
+
+**Defense Damage Reduction:**
+- Emergency Defense: 2 flat reduction → 1 damage taken
+- Retreat: 100% reduction → 0 damage (full dodge)
+- Parry: 3 flat reduction → 0 damage
+- Deflection: 3 flat reduction → 0 damage
+
+**Rationale:** HP-based system allows for strategic defense choices and varying damage outcomes while keeping combat deadly and focused on timing/prediction.
 
 ---
 
@@ -534,7 +547,7 @@ Based on your Combat3 - TechStack.md file, you have a detailed React + TypeScrip
 3. ✅ "Turn" terminology - Replaced with `<regeneration_rate>` variable
 
 ### Systems Defined:
-1. ✅ Damage System - 1 clean hit OR 3 hits = death
+1. ✅ Damage System - HP-based (3 HP, 3 damage attacks, death at HP <= 0)
 2. ✅ Telegraph UI - Manga-style panels with prediction display
 3. ✅ Combat Phases - 4-phase system (Wind-up, Committed, Impact, Recovery)
 4. ✅ Telegraph Timing - Detailed stage-by-stage breakdown

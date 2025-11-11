@@ -71,7 +71,7 @@
   ],
   "damage": {
     "type": "slashing",
-    "baseValue": 1,
+    "baseValue": 3,
     "scaling": {
       "strength": 1
     }

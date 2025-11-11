@@ -39,18 +39,16 @@ export function ActionPanel({ gameState, fighter, onExecuteSkill, onWait }: Acti
 
       impactText = `Impact: ${impactTick}ms`;
       timingText = `Wind: 0-${windUpEnd} · Commit: ${windUpEnd}-${impactTick} · Recov: ${impactTick}-${recoveryEnd}`;
-    } else if (skill.type === 'defense' && skillId === 'parry') {
-      // Parry has readinessWindow instead of standard phases
+    } else if (skill.type === 'defense') {
+      // Defense phase flow: windUp → active → recovery
       const windUpEnd = phases.windUp.duration;
-      // @ts-ignore - readinessWindow is not in standard PhaseTimings type
-      const readinessStart = phases.readinessWindow?.startTick || 500;
-      // @ts-ignore
-      const readinessDuration = phases.readinessWindow?.baseDuration || 400;
-      const readinessEnd = readinessStart + readinessDuration;
-      const recoveryEnd = readinessEnd + phases.recovery.duration;
+      const activeStart = windUpEnd;
+      const activeDuration = phases.active?.duration || 0;
+      const activeEnd = activeStart + activeDuration;
+      const recoveryEnd = activeEnd + phases.recovery.duration;
 
-      impactText = `Active: ${readinessStart}-${readinessEnd}ms`;
-      timingText = `Wind: 0-${windUpEnd} · Active: ${readinessStart}-${readinessEnd} · Recov: ${readinessEnd}-${recoveryEnd}`;
+      impactText = `Active: ${activeStart}-${activeEnd}ms`;
+      timingText = `Wind: 0-${windUpEnd} · Active: ${activeStart}-${activeEnd} · Recov: ${activeEnd}-${recoveryEnd}`;
     }
 
     return (
@@ -90,6 +88,9 @@ export function ActionPanel({ gameState, fighter, onExecuteSkill, onWait }: Acti
           {renderSkillButton('upward_strike', '⬆️', 'bg-blue-600 hover:bg-blue-700')}
           {renderSkillButton('diagonal_slash', '↘️', 'bg-blue-600 hover:bg-blue-700')}
           {renderSkillButton('parry', '🛡️', 'bg-green-600 hover:bg-green-700')}
+          {renderSkillButton('emergency_defense', '🚨', 'bg-yellow-600 hover:bg-yellow-700')}
+          {renderSkillButton('retreat', '↩️', 'bg-purple-600 hover:bg-purple-700')}
+          {renderSkillButton('deflection', '⚔️', 'bg-orange-600 hover:bg-orange-700')}
 
           {/* Wait Button */}
           <button

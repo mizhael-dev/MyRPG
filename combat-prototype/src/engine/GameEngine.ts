@@ -4,10 +4,10 @@
  * 🎯 THIS IS YOUR FOCUS AREA
  *
  * This is where atomic turn-based combat happens. Read through this code
- * to understand how 100ms ticks drive the entire combat simulation.
+ * to understand how 50ms ticks drive the entire combat simulation.
  *
  * Key concepts:
- * - Atomic ticks (100ms intervals)
+ * - Atomic ticks (50ms intervals)
  * - Event-driven architecture (Engine → UI communication)
  * - Deterministic combat (no RNG, pure timing)
  */
@@ -25,7 +25,7 @@ import type {
  * Main Combat Engine
  *
  * Responsibilities:
- * 1. Run atomic tick loop (100ms intervals)
+ * 1. Run atomic tick loop (50ms intervals)
  * 2. Update both fighters each tick
  * 3. Check for pause triggers
  * 4. Emit events to UI
@@ -38,7 +38,7 @@ export class GameEngine {
 
   private currentTick: number = 0;          // Current time in milliseconds
   private isRunning: boolean = false;       // Is the simulation running?
-  private tickInterval: number = 100;       // Atomic tick size (ms)
+  private tickInterval: number = 50;        // Atomic tick size (ms)
   private intervalId: number | null = null; // setInterval ID
 
   private pc: FighterState;                 // Player Character
@@ -81,22 +81,21 @@ export class GameEngine {
       id,
       name,
       resources: {
-        hp: 10,
+        hp: 3,
         stamina: 20,  // Constitution × 2
         mp: 20,       // Magic × 2
         focus: 20,    // Willpower
         dailyFatigue: 100, // Willpower × 5
       },
       maxResources: {
-        maxHp: 10,
+        maxHp: 3,
         maxStamina: 20,
         maxMp: 20,
         maxFocus: 20,
         maxDailyFatigue: 100,
       },
       currentAction: null,
-      availableSkills: ['side_slash', 'thrust', 'overhead_strike', 'upward_strike', 'diagonal_slash', 'parry'], // Default skills
-      hitsRemaining: 3, // Starts with 3 hits, clean hit = instant death (0), non-clean = -1
+      availableSkills: ['side_slash', 'thrust', 'overhead_strike', 'upward_strike', 'diagonal_slash', 'parry', 'emergency_defense', 'retreat', 'deflection'], // All skills
     };
   }
 
@@ -142,6 +141,21 @@ export class GameEngine {
       this.validateSkill(parry);
       this.skills.set('parry', parry);
 
+      const emergencyResponse = await fetch('/CombatSkills/defense/emergency_defense.json');
+      const emergency = await emergencyResponse.json();
+      this.validateSkill(emergency);
+      this.skills.set('emergency_defense', emergency);
+
+      const retreatResponse = await fetch('/CombatSkills/defense/retreat.json');
+      const retreat = await retreatResponse.json();
+      this.validateSkill(retreat);
+      this.skills.set('retreat', retreat);
+
+      const deflectionResponse = await fetch('/CombatSkills/defense/deflection.json');
+      const deflection = await deflectionResponse.json();
+      this.validateSkill(deflection);
+      this.skills.set('deflection', deflection);
+
       console.log('[GameEngine] Loaded skills:', Array.from(this.skills.keys()));
       this.log(`Loaded ${this.skills.size} combat skills`);
     } catch (error) {
@@ -166,6 +180,13 @@ export class GameEngine {
           `Invalid skill "${skill.id}": impact tick (${impactTick}) must equal windUp (${windUp}) + committed (${committed}) = ${windUp + committed}`
         );
       }
+
+      // Validate that impact tick is aligned with game tick interval
+      if (impactTick % this.tickInterval !== 0) {
+        throw new Error(
+          `Invalid skill "${skill.id}": impact tick (${impactTick}) must be a multiple of tick interval (${this.tickInterval}ms). Use ${Math.floor(impactTick / this.tickInterval) * this.tickInterval} or ${Math.ceil(impactTick / this.tickInterval) * this.tickInterval}`
+        );
+      }
     }
   }
 
@@ -176,7 +197,7 @@ export class GameEngine {
   /**
    * Start the combat simulation
    *
-   * This begins the atomic tick loop that runs every 100ms
+   * This begins the atomic tick loop that runs every 50ms
    */
   public start(): void {
     if (this.isRunning) {
@@ -287,6 +308,49 @@ export class GameEngine {
     const elapsed = action.elapsedTime;
     const prevPhase = action.currentPhase;
 
+    // DEFENSE SKILLS: windUp → active → recovery
+    if (skill.type === 'defense') {
+      const windUpEnd = skill.phases.windUp.duration;
+      const activeDuration = skill.phases.active?.duration || 0;
+      const activeEnd = windUpEnd + activeDuration;
+      const recoveryEnd = activeEnd + skill.phases.recovery.duration;
+
+      let newPhase: typeof action.currentPhase = action.currentPhase;
+
+      if (elapsed < windUpEnd) {
+        newPhase = 'windUp';
+        action.canCancel = skill.phases.windUp.canCancel;
+        action.canFeint = skill.phases.windUp.canFeint;
+      } else if (elapsed < activeEnd) {
+        newPhase = 'active';
+        action.canCancel = false;
+        action.canFeint = false;
+      } else if (elapsed < recoveryEnd) {
+        newPhase = 'recovery';
+        action.canCancel = false;
+        action.canFeint = false;
+      } else {
+        // Action complete, clear it
+        this.log(`${fighter.name} completed ${skill.name}`);
+        fighter.currentAction = null;
+        return;
+      }
+
+      // Update phase and emit event if changed
+      if (newPhase !== prevPhase) {
+        action.currentPhase = newPhase;
+        this.log(`${fighter.name} ${skill.name}: ${prevPhase} → ${newPhase}`);
+
+        this.emitEvent({
+          type: 'PHASE_CHANGED',
+          fighterId: fighter.id,
+          newPhase: newPhase,
+        });
+      }
+      return; // Exit early for defense skills
+    }
+
+    // ATTACK SKILLS: windUp → committed → impact → recovery
     // Calculate phase boundaries
     const windUpEnd = skill.phases.windUp.duration;
     const impactTick = skill.phases.impact.tick;
@@ -371,6 +435,8 @@ export class GameEngine {
 
   /**
    * Resolve impact when attack reaches Impact tick
+   * Damage formula: attackDamage * (1 - damageReductionPercent) - damageReductionFlat
+   * If damage < 0, then damage = 0
    */
   private resolveImpact(attacker: FighterState): void {
     const action = attacker.currentAction;
@@ -381,12 +447,28 @@ export class GameEngine {
 
     this.log(`${attacker.name} ${action.skill.name} Impact!`);
 
+    // Get base attack damage
+    const baseDamage = action.skill.damage?.baseValue || 0;
+    let finalDamage = baseDamage;
+
     // Check if defender has active defense
     const defenseActive = this.isDefenseActive(defender, action.elapsedTime);
 
-    if (defenseActive) {
-      // Perfect block - no damage, no hit counted
-      this.log(`${defender.name} blocked the attack!`);
+    if (defenseActive && defender.currentAction) {
+      // Defense is active - apply damage reduction
+      const defenseProps = defender.currentAction.skill.defenseProperties;
+      if (defenseProps) {
+        const percentReduction = defenseProps.damageReductionPercent || 0;
+        const flatReduction = defenseProps.damageReductionFlat || 0;
+
+        // Apply damage formula: damage * (1 - percent) - flat
+        finalDamage = baseDamage * (1 - percentReduction) - flatReduction;
+
+        // Ensure damage doesn't go below 0
+        if (finalDamage < 0) finalDamage = 0;
+
+        this.log(`${defender.name} ${defender.currentAction.skill.name} reduces damage: ${baseDamage} → ${finalDamage}`);
+      }
 
       // Apply parry stamina cost if applicable
       if (defender.currentAction?.skill.id === 'parry') {
@@ -395,91 +477,59 @@ export class GameEngine {
         defender.resources.stamina -= additionalCost;
         this.log(`${defender.name} parry cost: ${additionalCost.toFixed(1)} stamina`);
       }
+    }
 
-      this.emitEvent({
-        type: 'IMPACT_RESOLVED',
-        attacker: attacker.id,
-        defender: defender.id,
-        hit: false,
-      });
-    } else {
-      // Clean hit - no defense active
-      this.log(`${attacker.name} CLEAN HIT on ${defender.name}!`);
+    // Apply damage to HP
+    defender.resources.hp -= finalDamage;
+    this.log(`${defender.name} takes ${finalDamage} damage (HP: ${defender.resources.hp}/${defender.maxResources.maxHp})`);
 
-      // Clean strike: instant death (3 → 0)
-      defender.hitsRemaining = 0;
+    this.emitEvent({
+      type: 'IMPACT_RESOLVED',
+      attacker: attacker.id,
+      defender: defender.id,
+      hit: finalDamage > 0,
+    });
 
-      this.emitEvent({
-        type: 'IMPACT_RESOLVED',
-        attacker: attacker.id,
-        defender: defender.id,
-        hit: true,
-      });
-
-      // Check for death
-      this.checkDeath(defender, 'clean_hit');
+    // Check for death (HP <= 0)
+    if (defender.resources.hp <= 0) {
+      this.checkDeath(defender, 'hp_depleted');
     }
   }
 
   /**
    * Check if defender has active defense during attacker's impact
+   * All 4 defense types supported: Parry, Emergency Defense, Retreat, Deflection
    */
   private isDefenseActive(defender: FighterState, attackImpactTime: number): boolean {
     const defenseAction = defender.currentAction;
-    if (!defenseAction || defenseAction.skill.type !== 'defense') {
+    if (!defenseAction) return false;
+    if (defenseAction.skill.type !== 'defense') return false;
+
+    // Defense must be in active phase
+    if (defenseAction.currentPhase !== 'active') {
+      this.log(`${defender.name} defense not active: currently in ${defenseAction.currentPhase} phase`);
       return false;
     }
 
-    const skill = defenseAction.skill;
+    // Basic mode: Any defense in active phase blocks any attack
+    // Future: Check linePrediction for Parry, attackPrediction for Deflection
+    const defenseProps = defenseAction.skill.defenseProperties;
 
-    // For parry: check if in readiness window
-    if (skill.id === 'parry') {
-      // Read parry readinessWindow values from JSON
-      // @ts-ignore - readinessWindow not in PhaseTimings type
-      const readinessStart = skill.phases.readinessWindow?.startTick || 500;
-      // @ts-ignore
-      const readinessDuration = skill.phases.readinessWindow?.baseDuration || 400;
-      const defenseElapsed = defenseAction.elapsedTime;
+    this.log(
+      `${defender.name} ${defenseAction.skill.name} active (${defenseAction.elapsedTime}ms) - BLOCKS attack!`
+    );
 
-      // Defense is active if elapsed time is within readiness window
-      const inReadiness =
-        defenseElapsed >= readinessStart &&
-        defenseElapsed <= readinessStart + readinessDuration;
-
-      this.log(
-        `Parry check: elapsed=${defenseElapsed}ms, window=${readinessStart}-${readinessStart + readinessDuration}ms, active=${inReadiness}`
-      );
-
-      return inReadiness;
-    }
-
-    // TODO: Handle other defense types (dodge, etc.)
-    return false;
+    return true;
   }
 
   /**
    * Check if fighter should die
+   * Death occurs when HP <= 0
    */
   private checkDeath(fighter: FighterState, reason: string): void {
-    let shouldDie = false;
-    let deathReason = '';
-
-    // Check hits remaining
-    if (fighter.hitsRemaining <= 0) {
-      shouldDie = true;
-      deathReason = reason === 'clean_hit'
-        ? 'Clean strike - instant death'
-        : `No hits remaining (${3 - fighter.hitsRemaining} hits taken)`;
-    }
-    // Check HP (from exhaustion, etc.)
-    else if (fighter.resources.hp <= 0) {
-      shouldDie = true;
-      deathReason = 'HP depleted';
-      fighter.hitsRemaining = 0;
-    }
-
-    if (shouldDie) {
-      this.log(`${fighter.name} died: ${deathReason}`);
+    // Check HP
+    if (fighter.resources.hp <= 0) {
+      this.log(`${fighter.name} died: ${reason}`);
 
       // Clear current action
       fighter.currentAction = null;
@@ -487,7 +537,7 @@ export class GameEngine {
       this.emitEvent({
         type: 'FIGHTER_DIED',
         fighterId: fighter.id,
-        reason: deathReason,
+        reason: reason,
       });
 
       // Pause combat
@@ -510,7 +560,7 @@ export class GameEngine {
       if (telegraph.pause === true) {
         this.pauseState.isPaused = true;
         this.pauseState.reason = 'new_telegraph';
-        this.pauseState.availableActions = ['side_slash', 'thrust', 'overhead_strike', 'upward_strike', 'diagonal_slash', 'parry']; // TODO: Calculate based on time available
+        this.pauseState.availableActions = ['side_slash', 'thrust', 'overhead_strike', 'upward_strike', 'diagonal_slash', 'parry', 'emergency_defense', 'retreat', 'deflection']; // TODO: Calculate based on time available
 
         // Build prediction
         this.pauseState.prediction = {

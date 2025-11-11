@@ -8,7 +8,10 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(npm run build:skills:*)",
-      "Bash(del \"Overhead Strike.json\" \"Horizontal Strike.json\" \"Upward Strike.json\" \"Diagonal Slash.json\")"
+      "Bash(del \"Overhead Strike.json\" \"Horizontal Strike.json\" \"Upward Strike.json\" \"Diagonal Slash.json\")",
+      "Bash(timeout:*)",
+      "Bash(ping:*)",
+      "Bash(nul)"
     ],
     "deny": [],
     "ask": []

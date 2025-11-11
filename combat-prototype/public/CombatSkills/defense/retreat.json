@@ -32,7 +32,8 @@
     "requiresLine": false,
     "requiresAttackId": false,
     "defenseType": "movement",
-    "damageReduction": 1,
+    "damageReductionFlat": 0,
+    "damageReductionPercent": 1,
     "counterSpeedBonus": 0
   },
   "metadata": {

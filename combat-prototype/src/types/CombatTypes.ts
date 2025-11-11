@@ -10,10 +10,13 @@
 // ============================================================================
 
 /**
- * The four phases every combat action goes through
+ * The phases combat actions go through
  * Based on Combat3 - atomic_turns.md specification
+ *
+ * Attack flow: windUp → committed → impact → recovery
+ * Defense flow: windUp → active → recovery
  */
-export type CombatPhase = 'windUp' | 'committed' | 'impact' | 'recovery';
+export type CombatPhase = 'windUp' | 'committed' | 'active' | 'impact' | 'recovery';
 
 /**
  * Phase timing information from skill JSON
@@ -28,6 +31,10 @@ export interface PhaseTimings {
     duration: number;      // How long committed phase lasts (ms)
     canCancel: boolean;    // Always false - cannot cancel once committed
     canFeint: boolean;     // Always false
+  };
+  active?: {
+    duration: number;      // How long defense active window lasts (ms) - only for defenses
+    description: string;   // Description of active phase
   };
   impact: {
     tick: number;          // Exact ms when impact occurs
@@ -62,7 +69,7 @@ export interface Telegraph {
  * Based on 4-layer resource system from PRD.md
  */
 export interface Resources {
-  hp: number;              // Hit points (1 clean hit = death, 3 hits = death)
+  hp: number;              // Hit points (character dies when HP <= 0)
   stamina: number;         // Physical energy
   mp: number;              // Magic points
   focus: number;           // Mental clarity
@@ -107,7 +114,8 @@ export interface DefenseProperties {
   requiresLine?: boolean;        // Parry needs line selection (horizontal/center/diagonal/high/low)
   requiresAttackId?: boolean;    // Deflection needs specific attack prediction
   defenseType: 'emergency' | 'movement' | 'deflection';
-  damageReduction: number;       // 0.0-1.0 (0.5 = 50% reduction, 1.0 = full block)
+  damageReductionFlat: number;   // Flat damage reduction in points (e.g., 2.00 = reduces 2 damage, 3.00 = reduces 3 damage)
+  damageReductionPercent: number; // Percentage damage reduction (e.g., 0.50 = 50% reduction, 1.00 = 100% block)
   counterSpeedBonus?: number;    // Ms reduction to next attack windUp (e.g., 100 for deflection)
 }
 
@@ -153,7 +161,6 @@ export interface FighterState {
   maxResources: MaxResources;
   currentAction: ActionState | null;  // What they're doing right now
   availableSkills: string[];          // Skill IDs they can use
-  hitsRemaining: number;              // Hits remaining (starts at 3, clean hit = 0, non-clean = -1)
 }
 
 // ============================================================================
