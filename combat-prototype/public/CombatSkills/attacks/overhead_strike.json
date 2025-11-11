@@ -7,19 +7,19 @@
   "school": "none",
   "phases": {
     "windUp": {
-      "duration": 400,
+      "duration": 600,
       "canCancel": true,
       "canFeint": true,
       "description": "Attacker prepares the attack, telegraphs become progressively visible"
     },
     "committed": {
-      "duration": 800,
+      "duration": 400,
       "canCancel": false,
       "canFeint": false,
       "description": "Committed to the attack, weapon in motion, cannot be cancelled"
     },
     "impact": {
-      "tick": 1200,
+      "tick": 1000,
       "description": "The weapon connects with the target"
     },
     "recovery": {
@@ -40,7 +40,7 @@
       "stage": 1,
       "assetId": "shoulders_tense",
       "bodyPart": "shoulders",
-      "triggerTime": 0,
+      "triggerTime": 100,
       "description": "Shoulders tens up",
       "pause": true
     },
@@ -48,7 +48,7 @@
       "stage": 2,
       "assetId": "blade_rises_high",
       "bodyPart": "weapon",
-      "triggerTime": 100,
+      "triggerTime": 200,
       "description": "Blade rises high",
       "pause": true
     },
@@ -56,7 +56,7 @@
       "stage": 3,
       "assetId": "blade_overhead",
       "bodyPart": "weapon",
-      "triggerTime": 200,
+      "triggerTime": 300,
       "description": "Blade rises directly above head",
       "pause": true
     },
@@ -66,7 +66,15 @@
       "bodyPart": "stance",
       "triggerTime": 400,
       "description": "Brief pause at apex blade perfectly vertical",
-      "pause": false
+      "pause": true
+    },
+    {
+      "stage": 5,
+      "assetId": "vertical_commit",
+      "bodyPart": "weapon",
+      "triggerTime": 800,
+      "description": "Weapon swings down with full force",
+      "pause": true
     }
   ],
   "damage": {

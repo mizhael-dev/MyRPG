@@ -7,19 +7,19 @@
   "school": "none",
   "phases": {
     "windUp": {
-      "duration": 250,
+      "duration": 300,
       "canCancel": true,
       "canFeint": true,
       "description": "Attacker prepares the attack, telegraphs become progressively visible"
     },
     "committed": {
-      "duration": 600,
+      "duration": 500,
       "canCancel": false,
       "canFeint": false,
       "description": "Committed to the attack, weapon in motion, cannot be cancelled"
     },
     "impact": {
-      "tick": 850,
+      "tick": 800,
       "description": "The weapon connects with the target"
     },
     "recovery": {
@@ -40,7 +40,7 @@
       "stage": 1,
       "assetId": "weight_shift_back",
       "bodyPart": "foot",
-      "triggerTime": 0,
+      "triggerTime": 100,
       "description": "Weight shifts to back foot",
       "pause": true
     },
@@ -48,7 +48,7 @@
       "stage": 2,
       "assetId": "weight_shift_forward",
       "bodyPart": "foot",
-      "triggerTime": 100,
+      "triggerTime": 200,
       "description": "Weight shifts forward",
       "pause": true
     },
@@ -56,7 +56,7 @@
       "stage": 3,
       "assetId": "point_forward",
       "bodyPart": "weapon",
-      "triggerTime": 200,
+      "triggerTime": 300,
       "description": "Point aims directly at target in straight line",
       "pause": true
     },
@@ -66,7 +66,15 @@
       "bodyPart": "stance",
       "triggerTime": 250,
       "description": "Weight shifts decisively forward rear leg muscles visibly tense",
-      "pause": false
+      "pause": true
+    },
+    {
+      "stage": 5,
+      "assetId": "thrust_commit",
+      "bodyPart": "weapon",
+      "triggerTime": 600,
+      "description": "Weapon thrusts forward with full force",
+      "pause": true
     }
   ],
   "damage": {

@@ -7,13 +7,13 @@
   "school": "none",
   "phases": {
     "windUp": {
-      "duration": 400,
+      "duration": 500,
       "canCancel": true,
       "canFeint": true,
       "description": "Attacker prepares the attack, telegraphs become progressively visible"
     },
     "committed": {
-      "duration": 600,
+      "duration": 500,
       "canCancel": false,
       "canFeint": false,
       "description": "Committed to the attack, weapon in motion, cannot be cancelled"
@@ -23,7 +23,7 @@
       "description": "The weapon connects with the target"
     },
     "recovery": {
-      "duration": 400,
+      "duration": 600,
       "description": "Recovering from the attack, regaining balance and guard position"
     }
   },
@@ -40,7 +40,7 @@
       "stage": 1,
       "assetId": "shoulders_tense",
       "bodyPart": "shoulders",
-      "triggerTime": 0,
+      "triggerTime": 100,
       "description": "Shoulders tens up",
       "pause": true
     },
@@ -48,7 +48,7 @@
       "stage": 2,
       "assetId": "blade_drops_low",
       "bodyPart": "weapon",
-      "triggerTime": 100,
+      "triggerTime": 200,
       "description": "Blade drops low",
       "pause": true
     },
@@ -56,7 +56,7 @@
       "stage": 3,
       "assetId": "blade_points_down",
       "bodyPart": "weapon",
-      "triggerTime": 200,
+      "triggerTime": 300,
       "description": "Blade point aims downward",
       "pause": true
     },
@@ -66,7 +66,15 @@
       "bodyPart": "stance",
       "triggerTime": 400,
       "description": "Knees straighten body rises blade begins upward arc",
-      "pause": false
+      "pause": true
+    },
+    {
+      "stage": 5,
+      "assetId": "rising_commit",
+      "bodyPart": "weapon",
+      "triggerTime": 800,
+      "description": "Weapon swings up with full force",
+      "pause": true
     }
   ],
   "damage": {
