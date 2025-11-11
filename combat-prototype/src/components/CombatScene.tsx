@@ -73,8 +73,8 @@ export function CombatScene() {
     if (viewMode === 'debug') return gameState.combatLog;
 
     // Filter log based on what the fighter should know
-    const perspective = viewMode === 'pc' ? 'Player' : 'Opponent';
-    const opponent = viewMode === 'pc' ? 'Opponent' : 'Player';
+    const perspective = viewMode === 'pc' ? gameState.pc.name : gameState.npc.name;
+    const opponent = viewMode === 'pc' ? gameState.npc.name : gameState.pc.name;
 
     return gameState.combatLog.filter((entry) => {
       // Hide initialization messages (debug only)
@@ -205,7 +205,7 @@ export function CombatScene() {
           <div className="grid grid-cols-2 gap-4">
             {/* Player Character */}
             <div className="bg-gray-800 rounded p-4">
-              <h3 className="text-lg font-bold mb-2">Mizhael</h3>
+              <h3 className="text-lg font-bold mb-2">{gameState.pc.name}</h3>
               <div className="space-y-1 text-xs">
                 <div>
                   <span className="text-gray-400">HP:</span> {gameState.pc.resources.hp} /{' '}
@@ -242,7 +242,7 @@ export function CombatScene() {
 
             {/* Opponent */}
             <div className="bg-gray-800 rounded p-4">
-              <h3 className="text-lg font-bold mb-2">Bandit</h3>
+              <h3 className="text-lg font-bold mb-2">{gameState.npc.name}</h3>
               <div className="space-y-1 text-xs">
                 <div>
                   <span className="text-gray-400">HP:</span> {gameState.npc.resources.hp} /{' '}
