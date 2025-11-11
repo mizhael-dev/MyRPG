@@ -63,8 +63,8 @@ export class GameEngine {
     console.log('[GameEngine] Initializing combat engine...');
 
     // Initialize fighters with default state
-    this.pc = this.createFighter('pc', 'Player');
-    this.npc = this.createFighter('npc', 'Opponent');
+    this.pc = this.createFighter('pc', 'Mizhael');
+    this.npc = this.createFighter('npc', 'Bandit');
 
     this.log('Combat engine initialized');
   }
