@@ -3,7 +3,7 @@ name,Overhead Strike,Horizontal Strike,Thrust,Upward Strike,Diagonal Slash
 description,Vertical overhead attack with the weapon,A horizontal attack with the weapon. Naturally follows body rotation and can chain into follow-up attacks but wide arc makes it slower,A forward stabbing attack with the weapon. Faster than slash with forward momentum,A rising attack from low position,An angled cutting attack from high to low. Versatile and harder to predict than horizontal slash
 line,high,horizontal,center,low,diagonal
 # Phase Timings (ms)
-windUp_duration,600,600,300,500,400
+windUp_duration,600,600,400,500,400
 committed_duration,400,600,500,500,500
 impact_tick,AUTO,AUTO,AUTO,AUTO,AUTO
 recovery_duration,800,600,700,600,500

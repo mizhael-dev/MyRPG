@@ -12,7 +12,7 @@
       "description": "Preparing defensive action"
     },
     "active": {
-      "duration": 500,
+      "duration": 600,
       "description": "Defense is active and will trigger automatically"
     },
     "recovery": {
@@ -56,7 +56,7 @@
       "stage": 1,
       "assetId": "eyes_lock_blade",
       "bodyPart": "eyes",
-      "triggerTime": 0,
+      "triggerTime": 100,
       "description": "Eyes lock on opponent's blade",
       "pause": true
     },
@@ -64,7 +64,7 @@
       "stage": 2,
       "assetId": "blade_specific_angle",
       "bodyPart": "weapon",
-      "triggerTime": 100,
+      "triggerTime": 200,
       "description": "Blade moves with purpose to SPECIFIC angle hips rotate to optimal deflection position",
       "pause": true
     },
@@ -72,7 +72,7 @@
       "stage": 3,
       "assetId": "blade_perfect_angle",
       "bodyPart": "weapon",
-      "triggerTime": 200,
+      "triggerTime": 300,
       "description": "Blade at perfect intercept angle body coiled for sweeping motion point aimed at opening",
       "pause": true
     },

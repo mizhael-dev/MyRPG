@@ -12,7 +12,7 @@
       "description": "Preparing defensive action"
     },
     "active": {
-      "duration": 400,
+      "duration": 700,
       "description": "Defense is active and will trigger automatically"
     },
     "recovery": {
@@ -52,7 +52,7 @@
       "stage": 1,
       "assetId": "weight_shift_back",
       "bodyPart": "foot",
-      "triggerTime": 0,
+      "triggerTime": 100,
       "description": "Weight shifts to back foot",
       "pause": true
     },
@@ -60,7 +60,7 @@
       "stage": 2,
       "assetId": "hips_pull_back",
       "bodyPart": "body",
-      "triggerTime": 100,
+      "triggerTime": 200,
       "description": "Hips pull backward torso leans away back leg muscles tense",
       "pause": true
     },
@@ -69,7 +69,7 @@
       "assetId": "foot_lifts",
       "bodyPart": "foot",
       "triggerTime": 200,
-      "description": "Front foot lifts clear backward movement blade maintains guard but disengages",
+      "description": "Front foot lifts clear backward movemnt. Weapon maintains guard but disengages",
       "pause": true
     },
     {

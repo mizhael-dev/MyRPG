@@ -12,7 +12,7 @@
       "description": "Preparing defensive action"
     },
     "active": {
-      "duration": 200,
+      "duration": 600,
       "description": "Defense is active and will trigger automatically"
     },
     "recovery": {
@@ -52,7 +52,7 @@
       "stage": 1,
       "assetId": "eyes_widen",
       "bodyPart": "eyes",
-      "triggerTime": 0,
+      "triggerTime": 100,
       "description": "Eyes widen suddenly",
       "pause": true
     },
@@ -62,7 +62,7 @@
       "bodyPart": "arms",
       "triggerTime": 100,
       "description": "Arms flail upward chaotically blade position erratic shoulders hunch defensively",
-      "pause": true
+      "pause": false
     },
     {
       "stage": 3,
@@ -70,7 +70,7 @@
       "bodyPart": "stance",
       "triggerTime": 200,
       "description": "Fighter stumbles off-balance vulnerable",
-      "pause": true
+      "pause": false
     },
     {
       "stage": 4,

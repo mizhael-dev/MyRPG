@@ -7,7 +7,7 @@
   "school": "none",
   "phases": {
     "windUp": {
-      "duration": 300,
+      "duration": 400,
       "canCancel": true,
       "canFeint": true,
       "description": "Attacker prepares the attack, telegraphs become progressively visible"
@@ -19,7 +19,7 @@
       "description": "Committed to the attack, weapon in motion, cannot be cancelled"
     },
     "impact": {
-      "tick": 800,
+      "tick": 900,
       "description": "The weapon connects with the target"
     },
     "recovery": {

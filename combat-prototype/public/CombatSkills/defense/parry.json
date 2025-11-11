@@ -12,7 +12,7 @@
       "description": "Preparing defensive action"
     },
     "active": {
-      "duration": 500,
+      "duration": 600,
       "description": "Defense is active and will trigger automatically"
     },
     "recovery": {
@@ -55,7 +55,7 @@
       "stage": 1,
       "assetId": "eyes_lock_blade",
       "bodyPart": "eyes",
-      "triggerTime": 0,
+      "triggerTime": 100,
       "description": "Eyes lock on opponent's blade",
       "pause": true
     },
@@ -63,7 +63,7 @@
       "stage": 2,
       "assetId": "blade_to_line",
       "bodyPart": "weapon",
-      "triggerTime": 100,
+      "triggerTime": 200,
       "description": "Blade begins moving deliberately to specific line shoulders adjust to brace for impact",
       "pause": true
     },
@@ -71,7 +71,7 @@
       "stage": 3,
       "assetId": "blade_intercept_line",
       "bodyPart": "weapon",
-      "triggerTime": 200,
+      "triggerTime": 300,
       "description": "Blade positioned on interception line arms locked braced clear defensive structure",
       "pause": true
     },
