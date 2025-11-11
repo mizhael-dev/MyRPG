@@ -25,6 +25,7 @@ export function CombatScene() {
   // React state - when this updates, UI re-renders
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('debug');
+  const [failedPredictionFighter, setFailedPredictionFighter] = useState<string | null>(null);
 
   // Run once when component mounts
   useEffect(() => {
@@ -34,6 +35,14 @@ export function CombatScene() {
     const handleEvent = (event: any) => {
       if (event.type === 'STATE_UPDATE') {
         setGameState(event.state);
+
+        // Check combat log for failed predictions
+        const lastLog = event.state.combatLog[event.state.combatLog.length - 1];
+        if (lastLog?.includes('FAILED')) {
+          const fighter = lastLog.includes('Mizhael') ? 'pc' : 'npc';
+          setFailedPredictionFighter(fighter);
+          setTimeout(() => setFailedPredictionFighter(null), 500); // Clear after 500ms
+        }
       }
     };
 
@@ -201,6 +210,9 @@ export function CombatScene() {
             fighter="pc"
             viewMode={viewMode}
             onExecuteSkill={(skillId) => engine.executeSkill('pc', skillId)}
+            onExecuteSkillWithPredictions={(skillId, predictions) =>
+              engine.executeSkill('pc', skillId, predictions)
+            }
             onWait={() => {
               if (gameState.pauseState.isPaused) {
                 engine.togglePause();
@@ -305,7 +317,9 @@ export function CombatScene() {
           {/* Fighter States */}
           <div className="grid grid-cols-2 gap-4">
             {/* Player Character */}
-            <div className="bg-gray-800 rounded p-4">
+            <div className={`bg-gray-800 rounded p-4 ${
+              failedPredictionFighter === 'pc' ? 'border-4 border-red-500 animate-pulse' : ''
+            }`}>
               <h3 className="text-lg font-bold mb-2">{gameState.pc.name}</h3>
               <div className="space-y-1 text-xs">
                 <div>
@@ -342,7 +356,9 @@ export function CombatScene() {
             </div>
 
             {/* Opponent */}
-            <div className="bg-gray-800 rounded p-4">
+            <div className={`bg-gray-800 rounded p-4 ${
+              failedPredictionFighter === 'npc' ? 'border-4 border-red-500 animate-pulse' : ''
+            }`}>
               <h3 className="text-lg font-bold mb-2">{gameState.npc.name}</h3>
               <div className="space-y-1 text-xs">
                 <div>
@@ -395,6 +411,9 @@ export function CombatScene() {
             fighter="npc"
             viewMode={viewMode}
             onExecuteSkill={(skillId) => engine.executeSkill('npc', skillId)}
+            onExecuteSkillWithPredictions={(skillId, predictions) =>
+              engine.executeSkill('npc', skillId, predictions)
+            }
             onWait={() => {
               if (gameState.pauseState.isPaused) {
                 engine.togglePause();

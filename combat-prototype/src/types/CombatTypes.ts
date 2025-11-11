@@ -161,6 +161,7 @@ export interface FighterState {
   maxResources: MaxResources;
   currentAction: ActionState | null;  // What they're doing right now
   availableSkills: string[];          // Skill IDs they can use
+  activeCounterBonus?: number;        // Ms reduction to next attack windUp (from successful defense)
 }
 
 // ============================================================================
@@ -178,6 +179,9 @@ export interface ActionState {
   visibleTelegraphs: Telegraph[];   // Telegraphs visible to opponent
   canCancel: boolean;               // Can this action still be cancelled?
   canFeint: boolean;                // Can this action still be feinted?
+  linePrediction?: 'high' | 'horizontal' | 'center' | 'low' | 'diagonal'; // Parry line selection
+  attackPrediction?: string;        // Deflection attack ID prediction
+  windUpModifier?: number;          // Ms adjustment for counter bonus (negative = faster)
 }
 
 // ============================================================================

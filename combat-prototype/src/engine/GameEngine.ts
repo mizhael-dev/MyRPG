@@ -351,9 +351,9 @@ export class GameEngine {
     }
 
     // ATTACK SKILLS: windUp → committed → impact → recovery
-    // Calculate phase boundaries
-    const windUpEnd = skill.phases.windUp.duration;
-    const impactTick = skill.phases.impact.tick;
+    // Calculate phase boundaries (apply windUpModifier for counter bonus)
+    const windUpEnd = skill.phases.windUp.duration + (action.windUpModifier || 0);
+    const impactTick = skill.phases.impact.tick + (action.windUpModifier || 0);
     const recoveryEnd = impactTick + skill.phases.recovery.duration;
 
     // Determine current phase
@@ -477,6 +477,12 @@ export class GameEngine {
         defender.resources.stamina -= additionalCost;
         this.log(`${defender.name} parry cost: ${additionalCost.toFixed(1)} stamina`);
       }
+
+      // Apply counter speed bonus for successful defense
+      if (defenseProps?.counterSpeedBonus) {
+        defender.activeCounterBonus = defenseProps.counterSpeedBonus;
+        this.log(`${defender.name} gains ${defenseProps.counterSpeedBonus}ms counter bonus!`);
+      }
     }
 
     // Apply damage to HP
@@ -529,9 +535,33 @@ export class GameEngine {
       return false;
     }
 
-    // Basic mode: Any defense in active window blocks any attack
-    // Future: Check linePrediction for Parry, attackPrediction for Deflection
     const defenseProps = defenseAction.skill.defenseProperties;
+
+    // Validate line prediction (Parry)
+    if (defenseProps?.requiresLine) {
+      const attacker = defender.id === 'pc' ? this.npc : this.pc;
+      const attackLine = attacker.currentAction?.skill.line;
+      const predictedLine = defenseAction.linePrediction;
+
+      if (predictedLine !== attackLine) {
+        this.log(`${defender.name} Parry FAILED - wrong line (predicted ${predictedLine}, actual ${attackLine})`);
+        return false;
+      }
+      this.log(`${defender.name} Parry SUCCESS - correct line (${attackLine})`);
+    }
+
+    // Validate attack ID prediction (Deflection)
+    if (defenseProps?.requiresAttackId) {
+      const attacker = defender.id === 'pc' ? this.npc : this.pc;
+      const actualAttack = attacker.currentAction?.skill.id;
+      const predictedAttack = defenseAction.attackPrediction;
+
+      if (predictedAttack !== actualAttack) {
+        this.log(`${defender.name} Deflection FAILED - wrong attack (predicted ${predictedAttack}, actual ${actualAttack})`);
+        return false;
+      }
+      this.log(`${defender.name} Deflection SUCCESS - correct attack (${actualAttack})`);
+    }
 
     this.log(
       `${defender.name} ${defenseAction.skill.name} active (${defenseAction.elapsedTime}ms) - BLOCKS attack!`
@@ -610,7 +640,14 @@ export class GameEngine {
    *
    * This is called from the UI when player clicks an action button
    */
-  public executeSkill(fighterId: string, skillId: string): void {
+  public executeSkill(
+    fighterId: string,
+    skillId: string,
+    predictions?: {
+      linePrediction?: 'high' | 'horizontal' | 'center' | 'low' | 'diagonal';
+      attackPrediction?: string;
+    }
+  ): void {
     console.log(`[GameEngine] ${fighterId} wants to execute skill: ${skillId}`);
 
     const fighter = fighterId === 'pc' ? this.pc : this.npc;
@@ -639,6 +676,12 @@ export class GameEngine {
     fighter.resources.mp -= mpCost;
     fighter.resources.focus -= focusCost;
     fighter.resources.dailyFatigue -= dailyFatigueCost;
+
+    // Clear counter bonus when using any skill (encourages immediate counter-attack)
+    if (fighter.activeCounterBonus) {
+      this.log(`${fighter.name} counter bonus cleared (unused)`);
+      fighter.activeCounterBonus = undefined;
+    }
 
     this.log(
       `${fighter.name} spent: ${staminaCost} stam, ${mpCost} MP, ${focusCost} focus, ${dailyFatigueCost} fatigue`
@@ -687,6 +730,16 @@ export class GameEngine {
       }
     }
 
+    // Apply counter speed bonus if available
+    let windUpModifier = 0;
+    if (fighter.activeCounterBonus && skill.type === 'attack') {
+      windUpModifier = -fighter.activeCounterBonus; // Negative = faster
+      this.log(
+        `${fighter.name} uses ${fighter.activeCounterBonus}ms counter bonus: windUp ${skill.phases.windUp.duration}ms → ${skill.phases.windUp.duration + windUpModifier}ms`
+      );
+      fighter.activeCounterBonus = undefined; // Clear after use
+    }
+
     // Create new action
     fighter.currentAction = {
       skillId,
@@ -696,6 +749,9 @@ export class GameEngine {
       visibleTelegraphs: [],
       canCancel: skill.phases.windUp.canCancel,
       canFeint: skill.phases.windUp.canFeint,
+      windUpModifier, // Add counter bonus modifier
+      linePrediction: predictions?.linePrediction, // Add line prediction
+      attackPrediction: predictions?.attackPrediction, // Add attack prediction
     };
 
     this.log(`${fighter.name} begins ${skill.name}`);

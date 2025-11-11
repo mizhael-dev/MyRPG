@@ -6,25 +6,60 @@
  * Displays buttons for combat skills the player can use.
  */
 
-import type { GameState } from '../../types/CombatTypes';
+import { useState } from 'react';
+import type { GameState, CombatSkill } from '../../types/CombatTypes';
 import type { ViewMode } from '../ViewModeSelector';
+import { LineSelectionModal } from './LineSelectionModal';
+import { AttackPredictionDropdown } from './AttackPredictionDropdown';
 
 interface ActionPanelProps {
   gameState: GameState;
   fighter: 'pc' | 'npc';
   viewMode: ViewMode;
   onExecuteSkill: (skillId: string) => void;
+  onExecuteSkillWithPredictions: (
+    skillId: string,
+    predictions: {
+      linePrediction?: 'high' | 'horizontal' | 'center' | 'low' | 'diagonal';
+      attackPrediction?: string;
+    }
+  ) => void;
   onWait: () => void;
 }
 
-export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onWait }: ActionPanelProps) {
+export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onExecuteSkillWithPredictions, onWait }: ActionPanelProps) {
   const currentFighter = gameState[fighter];
   const canAct = !currentFighter.currentAction;
   const fighterColor = fighter === 'pc' ? 'green' : 'red';
   const fighterLabel = fighter === 'pc' ? 'PC' : 'NPC';
 
+  // UI state for modals
+  const [showLineSelection, setShowLineSelection] = useState(false);
+  const [showAttackPrediction, setShowAttackPrediction] = useState(false);
+
+  // Helper to get opponent's attacks
+  const getOpponentAttacks = (): CombatSkill[] => {
+    const opponent = fighter === 'pc' ? gameState.npc : gameState.pc;
+    return opponent.availableSkills
+      .map(id => gameState.loadedSkills.get(id))
+      .filter((skill): skill is CombatSkill => skill?.type === 'attack');
+  };
+
+  // Helper to determine likely predictions (placeholder for now)
+  const getLikelyLines = (): string[] => {
+    // TODO: Analyze opponent's visible telegraphs to determine likely lines
+    // For now, return empty array (show all equally)
+    return [];
+  };
+
+  const getLikelyAttacks = (): string[] => {
+    // TODO: Analyze opponent's visible telegraphs to determine likely attacks
+    // For now, return empty array (show all equally)
+    return [];
+  };
+
   // Helper function to render skill button with dynamic timings
-  const renderSkillButton = (skillId: string, icon: string, colorClass: string) => {
+  const renderSkillButton = (skillId: string, icon: string, colorClass: string, onClick?: () => void) => {
     const skill = gameState.loadedSkills.get(skillId);
     if (!skill) return null;
 
@@ -54,7 +89,7 @@ export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onWa
 
     return (
       <button
-        onClick={() => onExecuteSkill(skillId)}
+        onClick={onClick || (() => onExecuteSkill(skillId))}
         disabled={!canAct}
         className={`w-full px-2 py-2 rounded text-sm transition-all ${
           canAct
@@ -95,10 +130,10 @@ export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onWa
           {renderSkillButton('overhead_strike', '⬇️', 'bg-blue-600 hover:bg-blue-700')}
           {renderSkillButton('upward_strike', '⬆️', 'bg-blue-600 hover:bg-blue-700')}
           {renderSkillButton('diagonal_slash', '↘️', 'bg-blue-600 hover:bg-blue-700')}
-          {renderSkillButton('parry', '🛡️', 'bg-green-600 hover:bg-green-700')}
+          {renderSkillButton('parry', '🛡️', 'bg-green-600 hover:bg-green-700', () => setShowLineSelection(true))}
           {renderSkillButton('emergency_defense', '🚨', 'bg-yellow-600 hover:bg-yellow-700')}
           {renderSkillButton('retreat', '↩️', 'bg-purple-600 hover:bg-purple-700')}
-          {renderSkillButton('deflection', '⚔️', 'bg-orange-600 hover:bg-orange-700')}
+          {renderSkillButton('deflection', '⚔️', 'bg-orange-600 hover:bg-orange-700', () => setShowAttackPrediction(true))}
         </div>
 
         {!canAct && currentFighter.currentAction && (
@@ -113,6 +148,33 @@ export function ActionPanel({ gameState, fighter, viewMode, onExecuteSkill, onWa
         <div className="p-2 bg-blue-900/30 rounded text-blue-400 text-xs">
           ⏸ Paused
         </div>
+      )}
+
+      {/* Line Selection Modal for Parry */}
+      {showLineSelection && (
+        <LineSelectionModal
+          isOpen={showLineSelection}
+          likelyLines={getLikelyLines()}
+          onSelectLine={(line) => {
+            onExecuteSkillWithPredictions('parry', { linePrediction: line });
+            setShowLineSelection(false);
+          }}
+          onCancel={() => setShowLineSelection(false)}
+        />
+      )}
+
+      {/* Attack Prediction Dropdown for Deflection */}
+      {showAttackPrediction && (
+        <AttackPredictionDropdown
+          isOpen={showAttackPrediction}
+          availableAttacks={getOpponentAttacks()}
+          likelyAttacks={getLikelyAttacks()}
+          onSelectAttack={(attackId) => {
+            onExecuteSkillWithPredictions('deflection', { attackPrediction: attackId });
+            setShowAttackPrediction(false);
+          }}
+          onCancel={() => setShowAttackPrediction(false)}
+        />
       )}
     </div>
   );
