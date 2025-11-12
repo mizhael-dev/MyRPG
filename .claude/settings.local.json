@@ -5,7 +5,10 @@
       "Bash(git commit:*)",
       "Bash(git log:*)",
       "Bash(dir /S /B c:ProjectsMyRPG)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(npm run build:*)",
+      "Bash(cat:*)",
+      "Bash(by telegraph is the opponent.\"\n\nChanges:\n- checkAutoPause() now pauses for ALL telegraphs with pause=true\n- Correctly identifies opponent of telegraphing fighter\n- If PC telegraphs → NPC can act during pause\n- If NPC telegraphs → PC can act during pause\n\nAll three pause types verified working:\n1. Telegraph pause: Opponent can act\n2. Recovery complete pause: That fighter can act\n3. Death pause: Combat ends\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
