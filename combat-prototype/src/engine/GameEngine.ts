@@ -754,6 +754,15 @@ export class GameEngine {
       return;
     }
 
+    // Check if game is paused and if this fighter is allowed to act
+    if (this.pauseState.isPaused) {
+      const canThisFighterAct = this.pauseState.availableActions.includes(skillId);
+      if (!canThisFighterAct) {
+        console.warn(`[GameEngine] Game is paused - ${fighter.name} cannot act right now`);
+        return;
+      }
+    }
+
     // Check if fighter can act
     if (fighter.currentAction) {
       console.warn(`[GameEngine] ${fighter.name} already has active action`);
@@ -852,6 +861,15 @@ export class GameEngine {
 
     this.log(`${fighter.name} begins ${skill.name}`);
     console.log(`[GameEngine] ${fighter.name} started ${skill.name}`);
+
+    // Unpause the game if it was paused (fighter took action, resume combat)
+    if (this.pauseState.isPaused) {
+      this.pauseState.isPaused = false;
+      this.pauseState.reason = null;
+      this.pauseState.availableActions = [];
+      this.pauseState.prediction = null;
+      this.log('Combat resumed');
+    }
 
     // Start the tick interval on first action
     if (!this.ticksStarted && this.isRunning) {
