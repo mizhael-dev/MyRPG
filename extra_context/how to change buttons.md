@@ -1,3 +1,18 @@
+# How to find a button tempalte in React+Tailwind
+
+Search for button text, you will find {renderSkillButton('side_slash', '➡️', 'bg-blue-600 hover:bg-blue-700')}
+Then search for "const renderSkillButton ="
+OR "function renderSkillButton"
+
+Quick Reference:
+What you see in the code | What to search for | Where it takes you
+
+{renderSkillButton('side_slash', ...)} | const renderSkillButton = | Line 75 - function definition with all styling
+
+<LineSelectionModal isOpen={...} /> | function LineSelectionModal or export function LineSelectionModal | The component file with its styling
+
+<button className="..." /> | Just look at that line | Styling is right there inline
+
 # How to Change Action Buttons
 
 This guide explains where action buttons are defined and how to modify their heights, padding, and margins.
@@ -156,7 +171,7 @@ className={`w-full px-3 py-2 rounded transition-all relative flex items-center g
 ## Tailwind Padding/Margin Reference
 
 | Class             | Pixels | Use Case                 |
-|-------------------|--------|--------------------------|
+| ----------------- | ------ | ------------------------ |
 | `p-0` / `m-0`     | 0px    | No spacing               |
 | `p-0.5` / `m-0.5` | 2px    | Minimal spacing          |
 | `p-1` / `m-1`     | 4px    | Tight spacing            |

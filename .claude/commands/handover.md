@@ -1,5 +1,13 @@
 We made a lot of progress. I want you to write a handover document for an ai coding agent that will come after you but will have no memory of this project or the codebase. They will need to understan what the project is about and how to navigate it. They will need to understand the agreements between us that might have been in the chat history.
 
+Also prepare by reading full git commits messages from today.
+
+Example:
+git log --since="2025-11-11 00:00:00" --until="2025-11-11 23:59:59" --format=medium
+Take the today's date.
+
+Then:
+
 1. Create a handover document in the root with name yyyymmdd_handover.md date is today, if another file like that exists add underscore and next sequential number (e.g. 20251110_handover_2.md)
 2. New handover document is supposed to be standalone. Read the last handover document available in root and use it as your starting point.
 3. Include a folder and file tree
