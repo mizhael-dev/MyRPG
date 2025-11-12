@@ -106,6 +106,11 @@ export function CombatScene() {
         return true;
       }
 
+      // Show "ready to act again" messages for ALL fighters (always visible)
+      if (entry.includes('is ready to act again')) {
+        return true;
+      }
+
       // Show opponent telegraphs (visible information)
       if (entry.includes(opponent) && entry.includes('telegraph')) {
         return true;

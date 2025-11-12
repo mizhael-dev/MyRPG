@@ -220,6 +220,7 @@ export interface ActionHistoryEntry {
 export type PauseReason =
   | 'new_telegraph'           // New telegraph became visible
   | 'option_expiring'         // Decision window closing
+  | 'recovery_complete'       // Fighter has finished recovery and can act again
   | 'manual';                 // Player pressed pause
 
 /**

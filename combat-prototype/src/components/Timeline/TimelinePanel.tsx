@@ -6,6 +6,7 @@
  */
 
 import { useRef, useState, useEffect } from 'react';
+import type { JSX } from 'react';
 import type { GameState, ActionHistoryEntry, ActionState } from '../../types/CombatTypes';
 import type { ViewMode } from '../ViewModeSelector';
 
@@ -177,21 +178,46 @@ export function TimelinePanel({ gameState, viewMode }: TimelinePanelProps) {
   const timebarHeight = TIMELINE_CONFIG.TIMEBAR_HEIGHT;
   const spacing = TIMELINE_CONFIG.TIMEBAR_SPACING;
 
-  const positions = {
-    pcActual: 0,
-    pcSeenByNpc: timebarHeight + spacing,
-    npcActual: (timebarHeight + spacing) * 2,
-    npcSeenByPc: (timebarHeight + spacing) * 3,
-    combined: (timebarHeight + spacing) * 4,
-  };
-
-  const totalHeight = timebarHeight * 5 + spacing * 4;
-
   // View mode filtering
   const showPcActual = viewMode === 'debug' || viewMode === 'pc';
   const showPcSeenByNpc = viewMode === 'debug' || viewMode === 'npc';
   const showNpcActual = viewMode === 'debug' || viewMode === 'npc';
   const showNpcSeenByPc = viewMode === 'debug' || viewMode === 'pc';
+  const showCombined = viewMode === 'debug';
+
+  // Calculate positions based on which timebars are visible
+  let currentY = 0;
+  const positions: Record<string, number> = {};
+
+  if (showPcActual) {
+    positions.pcActual = currentY;
+    currentY += timebarHeight + spacing;
+  }
+  if (showPcSeenByNpc) {
+    positions.pcSeenByNpc = currentY;
+    currentY += timebarHeight + spacing;
+  }
+  if (showNpcActual) {
+    positions.npcActual = currentY;
+    currentY += timebarHeight + spacing;
+  }
+  if (showNpcSeenByPc) {
+    positions.npcSeenByPc = currentY;
+    currentY += timebarHeight + spacing;
+  }
+  if (showCombined) {
+    positions.combined = currentY;
+    currentY += timebarHeight + spacing;
+  }
+
+  // Calculate total height based on visible timebars
+  const visibleCount =
+    (showPcActual ? 1 : 0) +
+    (showPcSeenByNpc ? 1 : 0) +
+    (showNpcActual ? 1 : 0) +
+    (showNpcSeenByPc ? 1 : 0) +
+    (showCombined ? 1 : 0);
+  const totalHeight = (timebarHeight * visibleCount) + (spacing * Math.max(0, visibleCount - 1));
 
   // -------------------------------------------------------------------------
   // RENDER
@@ -263,15 +289,17 @@ export function TimelinePanel({ gameState, viewMode }: TimelinePanelProps) {
                 NPC_seen_by_PC
               </div>
             )}
-            <div
-              style={{
-                height: `${timebarHeight}px`,
-                lineHeight: `${timebarHeight}px`,
-                marginTop: `${spacing}px`,
-              }}
-            >
-              Combined
-            </div>
+            {showCombined && (
+              <div
+                style={{
+                  height: `${timebarHeight}px`,
+                  lineHeight: `${timebarHeight}px`,
+                  marginTop: `${spacing}px`,
+                }}
+              >
+                Combined
+              </div>
+            )}
           </div>
 
           {/* Timebar 1: PC_actual */}
@@ -294,12 +322,16 @@ export function TimelinePanel({ gameState, viewMode }: TimelinePanelProps) {
               renderActionBars(action, positions.npcSeenByPc, false, pxPerMs, timebarHeight)
             )}
 
-          {/* Timebar 5: Combined (PC on top half, NPC on bottom half) */}
-          {pcActions.map((action) =>
-            renderActionBars(action, positions.combined, false, pxPerMs, timebarHeight / 2)
-          )}
-          {npcActions.map((action) =>
-            renderActionBars(action, positions.combined + timebarHeight / 2, false, pxPerMs, timebarHeight / 2)
+          {/* Timebar 5: Combined (PC on top half, NPC on bottom half) - Debug mode only */}
+          {showCombined && (
+            <>
+              {pcActions.map((action) =>
+                renderActionBars(action, positions.combined, false, pxPerMs, timebarHeight / 2)
+              )}
+              {npcActions.map((action) =>
+                renderActionBars(action, positions.combined + timebarHeight / 2, false, pxPerMs, timebarHeight / 2)
+              )}
+            </>
           )}
 
           {/* Action bars render here */}

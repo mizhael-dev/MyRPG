@@ -348,6 +348,14 @@ export class GameEngine {
         this.actionHistory.push(historyEntry);
         this.log(`${fighter.name} action added to history: ${historyEntry.skill.name}`);
         fighter.currentAction = null;
+
+        // Trigger pause: recovery complete
+        this.log(`${fighter.name} is ready to act again`);
+        this.pauseState.isPaused = true;
+        this.pauseState.reason = 'recovery_complete';
+        this.pauseState.availableActions = fighter.availableSkills;
+        this.pauseState.prediction = null;
+
         return;
       }
 
@@ -397,6 +405,14 @@ export class GameEngine {
       this.actionHistory.push(historyEntry);
       this.log(`${fighter.name} action added to history: ${historyEntry.skill.name}`);
       fighter.currentAction = null;
+
+      // Trigger pause: recovery complete
+      this.log(`${fighter.name} is ready to act again`);
+      this.pauseState.isPaused = true;
+      this.pauseState.reason = 'recovery_complete';
+      this.pauseState.availableActions = fighter.availableSkills;
+      this.pauseState.prediction = null;
+
       return;
     }
 
@@ -1054,6 +1070,7 @@ export class GameEngine {
       pauseState: this.pauseState,
       combatLog: [...this.combatLog],
       loadedSkills: this.skills,
+      actionHistory: this.actionHistory,
     };
   }
 }
