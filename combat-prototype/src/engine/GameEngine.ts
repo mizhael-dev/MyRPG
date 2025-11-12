@@ -688,33 +688,40 @@ export class GameEngine {
    * Check if combat should auto-pause based on telegraph.pause field
    */
   private checkAutoPause(
-    _fighter: FighterState,
+    fighter: FighterState,
     reason: 'new_telegraph',
     telegraph?: any
   ): void {
     if (reason === 'new_telegraph' && telegraph) {
+      // Telegraph pause: When a fighter reveals a telegraph, the OPPONENT can act
+      // If PC telegraphs → NPC can act
+      // If NPC telegraphs → PC can act
+
       // Check if this telegraph should trigger a pause
       if (telegraph.pause === true) {
+        // Determine which fighter can act (the opponent of the telegraphing fighter)
+        const opponent = fighter.id === 'pc' ? this.npc : this.pc;
+
         this.pauseState.isPaused = true;
         this.pauseState.reason = 'new_telegraph';
-        this.pauseState.availableActions = ['side_slash', 'thrust', 'overhead_strike', 'upward_strike', 'diagonal_slash', 'parry', 'emergency_defense', 'retreat', 'deflection']; // TODO: Calculate based on time available
+        this.pauseState.availableActions = opponent.availableSkills;
 
         // Build prediction
         this.pauseState.prediction = {
           estimatedImpactRange: {
-            min: 1000, // TODO: Calculate from opponent's current action
+            min: 1000, // TODO: Calculate from fighter's current action
             max: 2500,
           },
         };
 
-        this.log(`Auto-pause: ${telegraph.description}`);
+        this.log(`Auto-pause: ${fighter.name} telegraph revealed, ${opponent.name} can act`);
 
         this.emitEvent({
           type: 'PAUSE_TRIGGERED',
           pauseState: this.pauseState,
         });
       } else {
-        // Telegraph revealed but no pause - just log it
+        // Telegraph revealed but not marked for pause
         this.log(`Telegraph revealed: ${telegraph.description}`);
       }
     }
