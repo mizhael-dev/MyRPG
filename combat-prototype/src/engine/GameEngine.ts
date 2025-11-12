@@ -19,6 +19,8 @@ import type {
   CombatSkill,
   FighterState,
   PauseState,
+  ActionHistoryEntry,
+  ActionState,
 } from '../types/CombatTypes';
 
 /**
@@ -55,6 +57,7 @@ export class GameEngine {
   private combatLog: string[] = [];         // Debug log
   private listeners: EventListener[] = [];  // UI event listeners
   private skills: Map<string, CombatSkill> = new Map(); // Loaded skills
+  private actionHistory: ActionHistoryEntry[] = []; // Full combat history for timeline
 
   // =========================================================================
   // CONSTRUCTOR
@@ -237,6 +240,9 @@ export class GameEngine {
       this.intervalId = null;
     }
 
+    // Clear action history
+    this.actionHistory = [];
+
     this.log('Combat stopped');
   }
 
@@ -336,8 +342,11 @@ export class GameEngine {
         action.canCancel = false;
         action.canFeint = false;
       } else {
-        // Action complete, clear it
+        // Action complete, save to history and clear
         this.log(`${fighter.name} completed ${skill.name}`);
+        const historyEntry = this.createHistoryEntry(fighter, action, this.currentTick);
+        this.actionHistory.push(historyEntry);
+        this.log(`${fighter.name} action added to history: ${historyEntry.skill.name}`);
         fighter.currentAction = null;
         return;
       }
@@ -382,8 +391,11 @@ export class GameEngine {
       action.canCancel = false;
       action.canFeint = false;
     } else {
-      // Action complete, clear it
+      // Action complete, save to history and clear
       this.log(`${fighter.name} completed ${skill.name}`);
+      const historyEntry = this.createHistoryEntry(fighter, action, this.currentTick);
+      this.actionHistory.push(historyEntry);
+      this.log(`${fighter.name} action added to history: ${historyEntry.skill.name}`);
       fighter.currentAction = null;
       return;
     }
@@ -399,6 +411,61 @@ export class GameEngine {
         newPhase,
       });
     }
+  }
+
+  /**
+   * Create a history entry from a completed action
+   * Pre-calculates all phase end times for fast timeline rendering
+   */
+  private createHistoryEntry(
+    fighter: FighterState,
+    action: ActionState,
+    endTick: number
+  ): ActionHistoryEntry {
+    const skill = action.skill;
+    const windUpModifier = action.windUpModifier || 0;
+
+    // Calculate when action started
+    const startTick = endTick - action.elapsedTime;
+
+    // Calculate phase end times
+    const windUpEnd = startTick + skill.phases.windUp.duration + windUpModifier;
+
+    // Recovery end calculation differs for attacks vs defenses
+    let recoveryStart: number;
+    if (skill.type === 'attack') {
+      recoveryStart = skill.phases.impact.tick + windUpModifier + startTick;
+    } else {
+      // Defense: recovery starts after active phase
+      recoveryStart = windUpEnd + (skill.phases.active?.duration || 0);
+    }
+    const recoveryEnd = recoveryStart + skill.phases.recovery.duration;
+
+    // Build base history entry
+    const entry: ActionHistoryEntry = {
+      fighterId: fighter.id as 'pc' | 'npc',
+      skill: skill,
+      startTick: startTick,
+      endTick: endTick,
+      phases: {
+        windUpEnd: windUpEnd,
+        recoveryEnd: recoveryEnd,
+      },
+      windUpModifier: windUpModifier,
+    };
+
+    // Add attack-specific phase times
+    if (skill.type === 'attack') {
+      entry.phases.committedEnd = startTick + skill.phases.windUp.duration + skill.phases.committed.duration + windUpModifier;
+      entry.phases.impactTick = startTick + skill.phases.impact.tick + windUpModifier;
+    }
+
+    // Add defense-specific phase times
+    if (skill.type === 'defense' && skill.phases.active) {
+      entry.phases.activeEnd = windUpEnd + skill.phases.active.duration;
+    }
+
+    return entry;
   }
 
   /**
@@ -950,6 +1017,7 @@ export class GameEngine {
       pauseState: this.pauseState,
       combatLog: [...this.combatLog], // Copy array
       loadedSkills: this.skills, // Expose loaded skills to UI
+      actionHistory: this.actionHistory, // Full combat history for timeline
     };
 
     this.emitEvent({

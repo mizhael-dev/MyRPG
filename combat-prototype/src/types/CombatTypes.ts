@@ -185,6 +185,32 @@ export interface ActionState {
 }
 
 // ============================================================================
+// ACTION HISTORY
+// ============================================================================
+
+/**
+ * A completed or in-progress combat action
+ * Used to render phase-colored bars on the timeline
+ */
+export interface ActionHistoryEntry {
+  fighterId: 'pc' | 'npc';          // Which fighter performed this action
+  skill: CombatSkill;                // The skill that was used
+  startTick: number;                 // When action started (milliseconds)
+  endTick: number;                   // When action ended (milliseconds)
+
+  // Pre-calculated phase end times for fast rendering
+  phases: {
+    windUpEnd: number;               // When wind-up phase ended (ms)
+    committedEnd?: number;           // When committed phase ended (ms) - attacks only
+    activeEnd?: number;              // When active phase ended (ms) - defenses only
+    impactTick?: number;             // When impact occurred (ms) - attacks only
+    recoveryEnd: number;             // When recovery phase ended (ms)
+  };
+
+  windUpModifier?: number;           // Counter speed bonus applied (negative = faster)
+}
+
+// ============================================================================
 // PAUSE SYSTEM
 // ============================================================================
 
@@ -226,6 +252,7 @@ export interface GameState {
   pauseState: PauseState;     // Is game paused? Why?
   combatLog: string[];        // Event log for debugging
   loadedSkills: Map<string, CombatSkill>; // All loaded skills from JSON
+  actionHistory: ActionHistoryEntry[];    // Full combat history for timeline rendering
 }
 
 // ============================================================================
