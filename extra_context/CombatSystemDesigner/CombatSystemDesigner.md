@@ -84,12 +84,13 @@ Stats are hidden so only during the fight the actors get a feeling what is the o
 - Faster character will try to hit first
 - Strong character will try to get into bind/power_struggle to throw opponent off balance and score a hit
 - High stamina character will try to draw out the fight to tire the opponent
+- Skills will have mastery levels giving benefits like shorter WarmUp, Commitment or Recovery duration.
 
 When intent/stance is introduced:
 - Strenghten decrease WarmUp duration and Commitement duration at cost of increasing Recovery. Faster, more decisive actions but more exposed.
 - Weaken will increase WarmUp duration and Commitement duration throwin off timing and allowing playing actions at unexpecteed time. Slower but strategically.
 
-In genraal, there are many ideas how to bend the system to adventage of the PC or NPC. But the initial system should give a fair foundation.
+In general, there are many ideas how to bend the system to adventage of the PC or NPC. But the initial system should give a fair foundation.
 
 
 #### **My assumptions and rules, that need testing**
