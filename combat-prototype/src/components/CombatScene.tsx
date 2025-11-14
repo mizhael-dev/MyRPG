@@ -96,6 +96,11 @@ export function CombatScene() {
         return false;
       }
 
+      // Hide "Auto-pause" messages (debug only)
+      if (entry.includes('Auto-pause:')) {
+        return false;
+      }
+
       // Always show: game state changes (paused, combat started/ended)
       if (entry.includes('paused') || entry.includes('Combat started') || entry.includes('Combat ended')) {
         return true;
