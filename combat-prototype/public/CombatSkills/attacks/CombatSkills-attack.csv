@@ -1,42 +1,30 @@
 id,overhead_strike,side_slash,thrust,upward_strike,diagonal_slash
 name,Overhead Strike,Horizontal Strike,Thrust,Upward Strike,Diagonal Slash
-description,Vertical overhead attack with the weapon,A horizontal attack with the weapon. Naturally follows body rotation and can chain into follow-up attacks but wide arc makes it slower,A forward stabbing attack with the weapon. Faster than slash with forward momentum,A rising attack from low position,An angled cutting attack from high to low. Versatile and harder to predict than horizontal slash
+description,Vertical overhead attack with the weapon,A horizontal attack with the weapon. Naturally follows body rotation and can chain into follow-up attacks but wide arc makes it slower,A forward stabbing attack with the weapon.,A rising attack from low position,An angled cutting attack from high to low. Versatile and harder to predict than horizontal slash
 line,high,horizontal,center,low,diagonal
 # Phase Timings (ms)
-windUp_duration,600,600,400,500,400
-committed_duration,400,600,500,500,500
+windUp_duration,500,500,500,500,500
+committed_duration,500,500,500,500,500
 impact_tick,AUTO,AUTO,AUTO,AUTO,AUTO
-recovery_duration,800,600,700,600,500
+recovery_duration,500,500,500,500,500
 # Telegraph Stage 1
 t1_triggerTime,100,100,100,100,100
-t1_assetId,shoulders_tense,shoulders_tense,weight_shift_back,shoulders_tense,shoulders_tense
-t1_bodyPart,shoulders,shoulders,foot,shoulders,shoulders
-t1_description,Shoulders tens up,Shoulders tens up,Weight shifts to back foot,Shoulders tens up,Shoulders tens up
+t1_assetId,Shoulders tens up,Shoulders tens up,Shoulders tens up,Shoulders tens up,Shoulders tens up
+t1_bodyPart,shoulders,shoulders,shoulders,shoulders,shoulders
+t1_description,attack has started,attack has started,attack has started,attack has started,attack has started
 t1_pause,true,true,true,true,true
 # Telegraph Stage 2
-t2_triggerTime,200,200,200,200,200
+t2_triggerTime,300,300,300,300,300
 t2_assetId,blade_rises_high,torso_rotate,weight_shift_forward,blade_drops_low,blade_rises_diagonal
 t2_bodyPart,weapon,body,foot,weapon,body
-t2_description,Blade rises high,Torso rotates sideways,Weight shifts forward,Blade drops low,Blade rises high | Torso rotates sideways
+t2_description,Overhead Strike or Horizontal Strike or Diagonal Slash,Overhead Strike or Horizontal Strike or Diagonal Slash,Thrust or Upward Strike,Thrust or Upward Strike,Overhead Strike or Horizontal Strike or Diagonal Slash
 t2_pause,true,true,true,true,true
 # Telegraph Stage 3
-t3_triggerTime,300,300,300,300,300
+t3_triggerTime,500,500,500,500,500
 t3_assetId,blade_overhead,blade_wide_side,point_forward,blade_points_down,blade_shoulder_diagonal
 t3_bodyPart,weapon,weapon,weapon,weapon,weapon
-t3_description,Blade rises directly above head,Blade pulls wide to the side,Point aims directly at target in straight line,Blade point aims downward,Blade rises to the shoulder
+t3_description,It's Overhead Strike!,It's Horizontal Strike!,It's Thrust!,It's Upward Strike!,It's Diagonal Slash!
 t3_pause,true,true,true,true,true
-# Telegraph Stage 4
-t4_triggerTime,400,500,250,400,600
-t4_assetId,vertical_commit,horizontal_commit,thrust_commit,rising_commit,diagonal_commit
-t4_bodyPart,stance,stance,stance,stance,stance
-t4_description,Brief pause at apex blade perfectly vertical,Hips reach maximum coil leading shoulder drops,Weight shifts decisively forward rear leg muscles visibly tense,Knees straighten body rises blade begins upward arc,Clear diagonal line from high shoulder to low opposite hip
-t4_pause,true,true,true,true,true
-# Telegraph Stage 5
-t5_triggerTime,800,1000,600,800,700
-t5_assetId,vertical_commit,horizontal_commit,thrust_commit,rising_commit,diagonal_commit
-t5_bodyPart,weapon,weapon,weapon,weapon,weapon
-t5_description,Weapon swings down with full force,Weapon swings to the side with full force,Weapon thrusts forward with full force,Weapon swings up with full force,Weapon swings diagonally with full force
-t5_pause,true,true,true,true,true
 # Damage
 damage_type,slashing,slashing,piercing,slashing,slashing
 damage_baseValue,3,3,3,3,3

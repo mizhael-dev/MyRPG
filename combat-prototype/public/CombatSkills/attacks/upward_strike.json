@@ -23,7 +23,7 @@
       "description": "The weapon connects with the target"
     },
     "recovery": {
-      "duration": 600,
+      "duration": 500,
       "description": "Recovering from the attack, regaining balance and guard position"
     }
   },
@@ -38,42 +38,26 @@
   "telegraphs": [
     {
       "stage": 1,
-      "assetId": "shoulders_tense",
+      "assetId": "Shoulders tens up",
       "bodyPart": "shoulders",
       "triggerTime": 100,
-      "description": "Shoulders tens up",
+      "description": "attack has started",
       "pause": true
     },
     {
       "stage": 2,
       "assetId": "blade_drops_low",
       "bodyPart": "weapon",
-      "triggerTime": 200,
-      "description": "Blade drops low",
+      "triggerTime": 300,
+      "description": "Thrust or Upward Strike",
       "pause": true
     },
     {
       "stage": 3,
       "assetId": "blade_points_down",
       "bodyPart": "weapon",
-      "triggerTime": 300,
-      "description": "Blade point aims downward",
-      "pause": true
-    },
-    {
-      "stage": 4,
-      "assetId": "rising_commit",
-      "bodyPart": "stance",
-      "triggerTime": 400,
-      "description": "Knees straighten body rises blade begins upward arc",
-      "pause": true
-    },
-    {
-      "stage": 5,
-      "assetId": "rising_commit",
-      "bodyPart": "weapon",
-      "triggerTime": 800,
-      "description": "Weapon swings up with full force",
+      "triggerTime": 500,
+      "description": "It's Upward Strike!",
       "pause": true
     }
   ],

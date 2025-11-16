@@ -7,7 +7,7 @@
   "school": "none",
   "phases": {
     "windUp": {
-      "duration": 400,
+      "duration": 500,
       "canCancel": true,
       "canFeint": true,
       "description": "Attacker prepares the attack, telegraphs become progressively visible"
@@ -19,7 +19,7 @@
       "description": "Committed to the attack, weapon in motion, cannot be cancelled"
     },
     "impact": {
-      "tick": 900,
+      "tick": 1000,
       "description": "The weapon connects with the target"
     },
     "recovery": {
@@ -38,42 +38,26 @@
   "telegraphs": [
     {
       "stage": 1,
-      "assetId": "shoulders_tense",
+      "assetId": "Shoulders tens up",
       "bodyPart": "shoulders",
       "triggerTime": 100,
-      "description": "Shoulders tens up",
+      "description": "attack has started",
       "pause": true
     },
     {
       "stage": 2,
       "assetId": "blade_rises_diagonal",
       "bodyPart": "body",
-      "triggerTime": 200,
-      "description": "Blade rises high | Torso rotates sideways",
+      "triggerTime": 300,
+      "description": "Overhead Strike or Horizontal Strike or Diagonal Slash",
       "pause": true
     },
     {
       "stage": 3,
       "assetId": "blade_shoulder_diagonal",
       "bodyPart": "weapon",
-      "triggerTime": 300,
-      "description": "Blade rises to the shoulder",
-      "pause": true
-    },
-    {
-      "stage": 4,
-      "assetId": "diagonal_commit",
-      "bodyPart": "stance",
-      "triggerTime": 600,
-      "description": "Clear diagonal line from high shoulder to low opposite hip",
-      "pause": true
-    },
-    {
-      "stage": 5,
-      "assetId": "diagonal_commit",
-      "bodyPart": "weapon",
-      "triggerTime": 700,
-      "description": "Weapon swings diagonally with full force",
+      "triggerTime": 500,
+      "description": "It's Diagonal Slash!",
       "pause": true
     }
   ],

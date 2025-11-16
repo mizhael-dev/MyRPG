@@ -6,17 +6,17 @@
   "school": "none",
   "phases": {
     "windUp": {
-      "duration": 300,
+      "duration": 100,
       "canCancel": true,
       "canFeint": false,
       "description": "Preparing defensive action"
     },
     "active": {
-      "duration": 600,
+      "duration": 700,
       "description": "Defense is active and will trigger automatically"
     },
     "recovery": {
-      "duration": 200,
+      "duration": 100,
       "description": "Resetting to guard position"
     }
   },
@@ -56,32 +56,8 @@
       "assetId": "eyes_lock_blade",
       "bodyPart": "eyes",
       "triggerTime": 100,
-      "description": "Eyes lock on opponent's blade",
+      "description": "It's Parry!",
       "pause": true
-    },
-    {
-      "stage": 2,
-      "assetId": "blade_to_line",
-      "bodyPart": "weapon",
-      "triggerTime": 200,
-      "description": "Blade begins moving deliberately to specific line shoulders adjust to brace for impact",
-      "pause": true
-    },
-    {
-      "stage": 3,
-      "assetId": "blade_intercept_line",
-      "bodyPart": "weapon",
-      "triggerTime": 300,
-      "description": "Blade positioned on interception line arms locked braced clear defensive structure",
-      "pause": true
-    },
-    {
-      "stage": 4,
-      "assetId": "blades_clash",
-      "bodyPart": "weapon",
-      "triggerTime": 300,
-      "description": "Blades clash both fighters in bind pushing testing for advantage",
-      "pause": false
     }
   ]
 }

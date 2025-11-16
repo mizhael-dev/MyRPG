@@ -1,47 +1,29 @@
-id,emergency_defense,retreat,parry,deflection
-name,Emergency Defense,Retreat,Parry,Deflection
-description,A desperate last-moment reaction. Can be executed very late but leaves you in poor position.,Step backward to create distance and break rhythm. Maintains guard but doesn't engage blade.,Intercept attack with blade on correct line. Stops attack with controlled blade contact.,Perfectly timed minimal deflection that redirects attack and creates counter opportunity.
+id,parry
+name,Parry
+description,Intercept attack with blade on correct line. Stops attack with controlled blade contact.
 # Phase Timings (ms)
-windUp_duration,500,500,500,500
-active_duration,500,500,500,500
-recovery_duration,500,300,200,200
+windUp_duration,100
+active_duration,700
+recovery_duration,100
 # Telegraph Stage 1
-t1_triggerTime,100,100,100,100
-t1_assetId,eyes_widen,weight_shift_back,eyes_lock_blade,eyes_lock_blade
-t1_bodyPart,eyes,foot,eyes,eyes
-t1_description,Eyes widen suddenly,Weight shifts to back foot,Eyes lock on opponent's blade,Eyes lock on opponent's blade
-t1_pause,true,true,true,true
-# Telegraph Stage 2
-t2_triggerTime,100,200,200,200
-t2_assetId,arms_flail,hips_pull_back,blade_to_line,blade_specific_angle
-t2_bodyPart,arms,body,weapon,weapon
-t2_description,Arms flail upward chaotically blade position erratic shoulders hunch defensively,Hips pull backward torso leans away back leg muscles tense,Blade begins moving deliberately to specific line shoulders adjust to brace for impact,Blade moves with purpose to SPECIFIC angle hips rotate to optimal deflection position
-t2_pause,false,true,true,true
-# Telegraph Stage 3
-t3_triggerTime,200,200,300,300
-t3_assetId,stumble_off_balance,foot_lifts,blade_intercept_line,blade_perfect_angle
-t3_bodyPart,stance,foot,weapon,weapon
-t3_description,Fighter stumbles off-balance vulnerable,Front foot lifts clear backward movemnt. Weapon maintains guard but disengages,Blade positioned on interception line arms locked braced clear defensive structure,Blade at perfect intercept angle body coiled for sweeping motion point aimed at opening
-t3_pause,false,true,true,true
-# Telegraph Stage 4
-t4_triggerTime,300,200,300,300
-t4_assetId,deep_recovery,lands_new_distance,blades_clash,minimal_contact_riposte
-t4_bodyPart,stance,stance,weapon,weapon
-t4_description,Deep recovery regaining composure and stance,Fighter lands at new distance blade still up but no threat,Blades clash both fighters in bind pushing testing for advantage,Blade makes minimal contact weapon slides harmlessly aside immediate riposte
-t4_pause,false,false,false,false
+t1_triggerTime,100
+t1_assetId,eyes_lock_blade
+t1_bodyPart,eyes
+t1_description,It's Parry!
+t1_pause,true
 # Defense Properties
-requiresLine,false,false,true,false
-requiresAttackId,false,false,false,true
-defenseType,emergency,movement,deflection,deflection
-damageReductionFlat,2.00,0.00,3.00,3.00
-damageReductionPercent,0.00,1.00,0.00,0.00
-counterSpeedBonus,0,0,100,300
+requiresLine,true
+requiresAttackId,false
+defenseType,deflection
+damageReductionFlat,3.00
+damageReductionPercent,0.00
+counterSpeedBonus,100
 # Metadata
-weaponTypes,any,any,sword|axe|dagger|spear,sword|axe|dagger|spear
-tags,defense|emergency|last-resort,defense|movement|spacing,defense|melee|timing,defense|melee|counter|advanced
-learningDifficulty,easy,easy,medium,hard
+weaponTypes,sword|axe|dagger|spear
+tags,defense|melee|timing
+learningDifficulty,medium
 # Resources (LAST)
-stamina_base,2,2,3,2
-mp_base,0,0,0,0
-focus_base,2,1,2,3
-dailyFatigue_base,4,2,2,3
+stamina_base,3
+mp_base,0
+focus_base,2
+dailyFatigue_base,2

@@ -1,13 +1,13 @@
 {
   "id": "thrust",
   "name": "Thrust",
-  "description": "A forward stabbing attack with the weapon. Faster than slash with forward momentum",
+  "description": "A forward stabbing attack with the weapon.",
   "type": "attack",
   "line": "center",
   "school": "none",
   "phases": {
     "windUp": {
-      "duration": 400,
+      "duration": 500,
       "canCancel": true,
       "canFeint": true,
       "description": "Attacker prepares the attack, telegraphs become progressively visible"
@@ -19,11 +19,11 @@
       "description": "Committed to the attack, weapon in motion, cannot be cancelled"
     },
     "impact": {
-      "tick": 900,
+      "tick": 1000,
       "description": "The weapon connects with the target"
     },
     "recovery": {
-      "duration": 700,
+      "duration": 500,
       "description": "Recovering from the attack, regaining balance and guard position"
     }
   },
@@ -38,42 +38,26 @@
   "telegraphs": [
     {
       "stage": 1,
-      "assetId": "weight_shift_back",
-      "bodyPart": "foot",
+      "assetId": "Shoulders tens up",
+      "bodyPart": "shoulders",
       "triggerTime": 100,
-      "description": "Weight shifts to back foot",
+      "description": "attack has started",
       "pause": true
     },
     {
       "stage": 2,
       "assetId": "weight_shift_forward",
       "bodyPart": "foot",
-      "triggerTime": 200,
-      "description": "Weight shifts forward",
+      "triggerTime": 300,
+      "description": "Thrust or Upward Strike",
       "pause": true
     },
     {
       "stage": 3,
       "assetId": "point_forward",
       "bodyPart": "weapon",
-      "triggerTime": 300,
-      "description": "Point aims directly at target in straight line",
-      "pause": true
-    },
-    {
-      "stage": 4,
-      "assetId": "thrust_commit",
-      "bodyPart": "stance",
-      "triggerTime": 250,
-      "description": "Weight shifts decisively forward rear leg muscles visibly tense",
-      "pause": true
-    },
-    {
-      "stage": 5,
-      "assetId": "thrust_commit",
-      "bodyPart": "weapon",
-      "triggerTime": 600,
-      "description": "Weapon thrusts forward with full force",
+      "triggerTime": 500,
+      "description": "It's Thrust!",
       "pause": true
     }
   ],

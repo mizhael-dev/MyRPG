@@ -7,23 +7,23 @@
   "school": "none",
   "phases": {
     "windUp": {
-      "duration": 600,
+      "duration": 500,
       "canCancel": true,
       "canFeint": true,
       "description": "Attacker prepares the attack, telegraphs become progressively visible"
     },
     "committed": {
-      "duration": 600,
+      "duration": 500,
       "canCancel": false,
       "canFeint": false,
       "description": "Committed to the attack, weapon in motion, cannot be cancelled"
     },
     "impact": {
-      "tick": 1200,
+      "tick": 1000,
       "description": "The weapon connects with the target"
     },
     "recovery": {
-      "duration": 600,
+      "duration": 500,
       "description": "Recovering from the attack, regaining balance and guard position"
     }
   },
@@ -38,42 +38,26 @@
   "telegraphs": [
     {
       "stage": 1,
-      "assetId": "shoulders_tense",
+      "assetId": "Shoulders tens up",
       "bodyPart": "shoulders",
       "triggerTime": 100,
-      "description": "Shoulders tens up",
+      "description": "attack has started",
       "pause": true
     },
     {
       "stage": 2,
       "assetId": "torso_rotate",
       "bodyPart": "body",
-      "triggerTime": 200,
-      "description": "Torso rotates sideways",
+      "triggerTime": 300,
+      "description": "Overhead Strike or Horizontal Strike or Diagonal Slash",
       "pause": true
     },
     {
       "stage": 3,
       "assetId": "blade_wide_side",
       "bodyPart": "weapon",
-      "triggerTime": 300,
-      "description": "Blade pulls wide to the side",
-      "pause": true
-    },
-    {
-      "stage": 4,
-      "assetId": "horizontal_commit",
-      "bodyPart": "stance",
       "triggerTime": 500,
-      "description": "Hips reach maximum coil leading shoulder drops",
-      "pause": true
-    },
-    {
-      "stage": 5,
-      "assetId": "horizontal_commit",
-      "bodyPart": "weapon",
-      "triggerTime": 1000,
-      "description": "Weapon swings to the side with full force",
+      "description": "It's Horizontal Strike!",
       "pause": true
     }
   ],
