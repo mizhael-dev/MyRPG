@@ -113,6 +113,25 @@ A hit is possible, but it requires substantial footwork, typically a committed s
 
 ---
 
+---
+
+### Tempo: Actions (Italian)
+
+#### Italian categorization of tempo
+ 
+1. **Dui Tempi (Two Actions):** This refers to any sequence requiring two distinct phases, typically involving simultaneous footwork and weapon movement, such as a Move/Strike combination or a Feint/Strike sequence.
+  ***These actions possess a high cumulative `AP` or `IT` cost. Mechanically, Dui Tempi actions are intentionally designed to be interruptible, structurally rewarding the defender who conserves resources `FP` for a counter-attack.***
+
+2. **Primo Tempo (Single Action):** A single Action, like a fluent Strike with a single motion of the sword. This is a fast, efficient strike requiring the low `AP` cost and `IT` cost. It is designed to maximize damage while minimizing the opponent's window of opportunity.
+  ***In game terms, **Primo Tempo** is only achievable when the combatant is already in Zufechten distance or has successfully created an opening via a preceding bind or feint.***
+
+3. **Mezzo Tempo (Interruption/Half-Time):** This is the mechanical core of the Active Pause system. Mezzo Tempo is defined as a preemptive strike, often targeting an uncovered limb, or a counter initiated before the opponent's main strike has fully begun.
+  ***In the game system, this translates to the requirement of spending a dedicated resource, Focus, to resolve an action immediately upon the opponent’s declaration of a Dui Tempi action, thereby seizing the initiative flow.***
+
+4. **Contratempo (Simultaneous Strike):** This occurs when both combatants attempt to execute offensive actions against each other within the same immediate window. This models the dangerous reality of mutual engagement. Resolution requires a specific Structured Priority Check to determine the outcome, resulting in a calculated outcome, often a "controlled double hit" where the combatant with superior structure or timing gains a critical advantage while still sustaining minimal damage. 
+
+---
+
 ### In a Bind: Quantifying Fühlen (Strone and Weak Leverage) with The Leverage Track: 
 
    - **Fühlen:** trained instinct to judge the opponent's leverage (Strong or Weak) and makes a definitive counter-action (a winding, a disengage, or a press).

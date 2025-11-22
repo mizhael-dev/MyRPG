@@ -61,13 +61,77 @@ Describe/define below conscepts in the simliar style as I did below for other co
 ---
 
 ### Resources:
-- Action Points (AP) - effort
-- Initiative Tick (IT) - time
-- Focus Points (FP)
+- Action Points (`AP`) - acts as a measure of stamina, willpower and willingness to press forward.
+  - `TurnAP` how much is left to spend, replenishes from the `MaxAP` pool after `Indes` is resolved. (This is to avoid a situation when Hit `Indes` never happens and Players are always changing their decisions)
+- Initiative Tick (`IT`) - time
+- Focus Points (`FP`)
 
 ---
 
-### Distance as a Core Tactical State
+### High Level combat flow
+1. Combat starts
+   1. `AP` resource is set to max available for value available for the fencer `TurnAP` (6/6)
+   2. `FP` is set to 3 `TurnFP` (3/3)
+   3. `CurrentTick` time is set to 0
+   4. The `CurrentTick` countup is paused 
+2. Fencers are `StartDistance` apart (280cm)
+3. First `Indes`: P1 and P2 select their Actions blindly (they don't see the opponent's choice) and secretely (the opponent doesn't see it). Available actions:
+   1. Move forward/backwards
+      1. How far `MoveDistance`
+      2. The sytem calculates the AP cost
+      3. The system caluclates IT duration (how long it will take to move the desired `Distance`)
+   2. `GuardChange`
+      1. Change `Guard` to another e.g. from `Guard`=Plow to `Guard`=Wrath 
+      2. `GuardPosition` move to another GuardPosition e.g. postion=7 for high-left 
+   3. `WeaponAction`
+      1. `Intent` Hitter, Taker, Provoker
+      2. `AttackDirection` weapon ending position. Has to be the oposite of the current `GuardPosition` e.g. from 7 you move (cut) to either 2, 3, 6
+      3. `A-AP` EDIT
+      4. `D-AP` EDIT
+   4. `Focus` If you are in `Nach` how many Focus Points `FP` are you going to spend to catch up to Opponent that has started the attack first (`Vor`). 1FP = 1IT. With FP of 3 you can be 3 Ticks behind the attacker on the timeline and still make it for the `Impact`
+
+---
+
+### Atomic Turns - Core Combat System
+
+System abstracts timing directly into quantifiable time units managed on a `Timeline`.
+This approach uses the concept of Initiative Ticks `IT` to simulate action duration.
+
+In this system, fencers share a common `Timeline` govern by `CurrentTick`. The turn order is fluid and based on `SpentIT` of a total action and the `RecoveryIT` time.
+
+Different Actions have different `APcost`, `ITcost`.
+`Movement` is resolved in parallel to other `Actions` (GuardChange, WeaponAction, Focus). (see Movement section for the most up to date information)
+`Focus` is spent to "catch up" on the timeline and to finish WeaponAction at the same time as the opponent.
+
+`TurnAction`
+- `Movement`: {`MoveDirection`, `MoveDistance`}
+- `GuardChange`: {`NewGuard`}
+- `WeaponAction`: {`Intent`, `AttackDirection`, `A-AP`, `D-AP`}
+- `Focus`: {`SpentFocus`}
+
+Simplified Example (numbers do not match with actual IT cost of actions):
+1. Indes:
+  - P1 selects in the Indes: `Movement` 40m forward (1 IT)
+  - P2 selects in the Indes: `Movement` 80m forward (2 IT)  and `WeaponAction` (5 IT)
+2. Game unpauses and `CurrentIT` countsup
+3. Game `Pause` at `CurrentIT`=1 (0+1) because:
+   1. `Pause` = `RecoveryComplete`, P1 finished Recovery and doesn't have any action selected (RecoveryIT is zero for Movement action)
+   2. `Pause` = `new_telegraph` for P1, "P2 finished taking a passing step forward"
+   3. `Pause` = `new_telegraph` for P2, "P2 has made a passing step forward and is moving forward. P2 is readying their weapon."
+4. P1 selects `Wait`
+5. P2 selects `Continue`
+6. Game unpauses and `CurrentIT` countsup
+3. Game `Pause` at `CurrentIT`=4 because:
+   1. `Pause` = `new_telegraph` for P1, "P2 raises their weapon to strike"
+4. P1 selects `Wait`
+5. Game unpauses and `CurrentIT` countsup
+6. Game `Pause` at `CurrentIT`=5 because:
+   1. `Pause` = `Death` for P1 and P2, "P2 hit P1 with a weapon. P1 has died"
+
+
+---
+
+### Distance - Core Tactical State (Hit chance)
 
 For the strike to land it needs to be executed in the approperiate distance from the opponent.
 Distance is the only factor that can make a hit really miss.
@@ -82,29 +146,31 @@ Moving has `AP` cost (effort) and `IT` (time) cost and is a vulnarability (oppor
     - `Distance` between 100cm to 140cm - attack hits
     - `Distance` =< 100cm - attack hits -> `Bind`
     - `Collision` if distance after move < 0, then 0. Resolve normally
-  - `Movement cost`:
+  - `StartDistance` combat starts with fencers 280cm apart
+  - `Movement`:
     - `MoveDistance`: 46-90cm,`MoveCost`=2, `Pause` = 1
     - `MoveDistance`: 0-45cm, `MoveCost`=1, `Pause` = 1
     - `MoveDistance`: 0-10cm, `MoveCost`=0, `Pause` = 0
-  - Each fencer has a `movement speed`, a maximal distance they can move (`moveIT`) in one `IT`.
+  - Each fencer has a `MoveSpeed`, a maximal distance they can move (`MoveIT`) in one `IT`.
     - `UserDistanceSelection`/`MoveSpeed`= `RoundUp(number of IT needed to complete move)`
     - UI will show how many TI will the move will take. 
   - fencers move (use legs) and use arms (move sword) at the same time. Action time and move time moves in parralell:
-   - if the `moveIT` is equal or lower than the `actionIT`, then it doesn't add time to action
+   - if the `MoveIT` is equal or lower than the `ActionIT`, then it doesn't add time to action
    - if move takes more time than the action, overflow time will be added at the beginning of the action
    - move telegraph will be emited at the end of first `IT` in which move happened.
   -fencers always move at top speed (their life is on the line)
   - forward move starts time is calculated from the end of action so that the action benefit from forward momentum
   - backward move starts at the beginning of the action, wince it's a defensive move
   - attacks benefit from forward momentum
-  - fencers move is resolved at the same time as `globalIT` counts forward
+  - fencers move is resolved at the same time as `CurrentIT` counts forward
 
-#### Distance: Design and reality context 
+#### Distance - Design and reality context
+
   1. **Out of Measure (Fuori Misura):** This is the preparatory range. At this distance, neither opponent can land a blow, even with maximal footwork, such as a jump or a step-lunge. 
      ***Attacks don't make sense. Only preparatory actions, brief rest window, guard change, feint, forward/backward movement are permitted. Since no direct attacks are feasible, this zone emphasizes observation and resource banking.***
 
   2. **Wide Distance (Larga Misura, Zufechten):** Considered Out of Measure for most techniques, where a fencer might be over-reaching, makeing them vulnerable to counter-strikes. A hit is possible, but it requires substantial footwork, typically a committed step-lunge or a full passing step. 
-      ***Attacks initiated from this range are intrinsically **Dui Tempi (two-action) moves**, which necessitate a high AP cost and create a mandatory, exploitable vulnerability with Active Pause window for the opponent.***
+    ***Attacks initiated from this range are intrinsically **Dui Tempi (two-action) moves**, which necessitate a high AP cost and create a mandatory, exploitable vulnerability with Active Pause window for the opponent.***
    
   3. **One-step Distance (Zufechten):** A fencer can take a comfortable passing step forward to be in the correct measure to hit the opponent directly.
      **Primo Tempo (one-action) strikes**
@@ -129,35 +195,85 @@ Moving has `AP` cost (effort) and `IT` (time) cost and is a vulnarability (oppor
 3. **Mezzo Tempo (Interruption/Half-Time):** This is the mechanical core of the Active Pause system. Mezzo Tempo is defined as a preemptive strike, often targeting an uncovered limb, or a counter initiated before the opponent's main strike has fully begun.
   ***In the game system, this translates to the requirement of spending a dedicated resource, Focus, to resolve an action immediately upon the opponent’s declaration of a Dui Tempi action, thereby seizing the initiative flow.***
 
-1. **Contratempo (Simultaneous Strike):** This occurs when both combatants attempt to execute offensive actions against each other within the same immediate window. This models the dangerous reality of mutual engagement. Resolution requires a specific Structured Priority Check to determine the outcome, resulting in a calculated outcome, often a "controlled double hit" where the combatant with superior structure or timing gains a critical advantage while still sustaining minimal damage. 
+4. **Contratempo (Simultaneous Strike):** This occurs when both combatants attempt to execute offensive actions against each other within the same immediate window. This models the dangerous reality of mutual engagement. Resolution requires a specific Structured Priority Check to determine the outcome, resulting in a calculated outcome, often a "controlled double hit" where the combatant with superior structure or timing gains a critical advantage while still sustaining minimal damage. 
 
 ---
 
-### Tempo: Opportunity to strike or a Vulnerability
-In GameEngine a `pause`.
+### Tempo: Opportunity to strike or a Vulnerability (Auto-Pause)
+Gives a chance to either fencer in `Initiative`=`Vor` or `Initiative`=`Nach` to adjust their `Actions` in light of new information `Telegraphs`.
+
+  ***In GameEngine it's a `Pause`, Players cannot interact with the game outside of `Pause`=`true`.***
+
+  ***Game pauses when:***
+  1. `NewTelegraph` New meaningful telegraph information emerges (Every time you see their weapon, foot, or body move)
+    - Triggers when telegraph with `Pause: true` is revealed
+    - **Opponent** of fencer that emitts teh telegraph can act
+    - Example: P1 telegraphs → P2 can respond 
+  2. `RecoveryComplete` Recovery phase is completed and actor can act again <- EDIT Recovey might get removed from the game
+    - Triggers at the end of last `ActionIT` when action recovery ends
+    - **That fighter** can act again
+    - Message: "{name} is ready to act again"
+  3. `Death` On hp <= 0
+    - Triggers when HP <= 0
+    - Combat ends, no more actions can be taken by netier P1 or P2
+    - Message: "{name} died"
+  4. `Indes` Indes starts, the attack is about to be resolved
+  5. After you have parried their attack.
+  6. When their blow has passed outside your body (a miss (out of measure) or void).
+  7. When they raise their sword to attack you (while their hand/weapon is in motion).
+  8. While they change their guard (The bigger the movement the bigger the opportunity)
+  9. When they move or lift a foot to change their pace or move towards you or away from you (while they are mid-step and off-balance).
+
+#### Tempo: Opportinty and Vulnerability - Design and reality context
+
+The best time to attack your opponent is when he moves (gives you a tempo).  Conversely, a fencer should expect to be attacked if he makes one of these five actions.  However, to gain the advantages, one must first move.  The advantages come with their liabilities, and may not seem like advantages at all if they are also perfect opportunities for the opponent to strike. The key, however, is that one should expect to be struck at  while moving to take advantage.  Thus, they are invitations for an opponent to strike.  By making a half cut to gain the Advantage of Guard, and a half step to gain the Advantage of the Step, one can entice his opponent to make a full blow, and this large tempo can be exploited in turn with a parry and counter in a single, shorter tempo.
+
+Gaining any Advantage requires one to make a tempo.  Delivering a half cut requires one to move from one guard to another, falsing requires the point to leave presence, and stepping offline requires the entire body to move.  Each one of these movements (and especially any combination of them) is a perfect opportunity for the opponent to strike.  Because the one attempting to gain the advantage is required to leave the safety of his guard and move into another, he is momentarily susceptible to an attack, which is what an opponent should look for when making a strike.
 
 ---
 
-### Tempo: Phase (German cateogrizaiton)
+### Tempo: Initiative & Indes
+
 1. **Vor (Before)** - represents the initial attack or aggressive action taken by one fencer, seizing the initiative. This action forces a response from the opponent.
-2. **Nach (After)** -  is the subsequent defensive reaction or counter-tempo action taken by the defender, often resulting in a binding of the blades.
+   
+   ***GameEngine:***
+   - Fencer who's planned `Impact` (moment when attack is going to be resolved if no Actions are made) is sooner on the `Timeline` than the other person's `Impact`, has `Initiative`=`Vor`
+   - `Initiative`=`Vor` gives a bonus to `Leaverage` +1 Stark
+   - If both fencers have expected `Impact` in the same `Tick` on the `Timeline`, neither will get a `Vor` Leavearge bonus when `Indes` is resolved. ***
+   
+2. **Nach (After)** -  is the subsequent defensive reaction or counter-tempo action taken by the defender, often resulting in a binding of the blades (an Interrrupt).
+   
+    ***GameEngine:***
+    - Fencer who's planned `Impact` is at least 1 `Tick` later on the `Timelien` than the other person's `Impact`, has `Initiative`=`Nach`
+    - They can see opponent's Actions `Telegraph` before commiting to an Action. That gives them more information to make better choices to adjust to the attack and gain `Leverage` adventage before `Indes`.
+    - Once they are ready, they spend spend `FP` (Focus points) to "catch up" to `Vor` on the timeline, which triggers `Indes`. (Vor bonus stays on for the attacker)
+   
 3. **Indes (Instant/Meanwhile/instance of stilleness)** - the single most critical element for simulating KdF in an atomic-turn system. Indes translates to "in the instant" or "meanwhile" and represents the immediate, **reflexive action taken upon contact with the opponent's sword**. This is the precise moment where a fencer, using trained instinct (**Fühlen**) to judge opponent's **Leaverage** (Strong or Weak) and makes a definitive counter-action (a **winding**, a **disengage**, or a **press**).
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ***GameEngine:*** EDIT EDIT EDIT EDIT !!!!!!!!
+  - Before Indes resolution is revealed, fencers have one last chance to edit their Actions and go to Vor Nach again. It will cost 3 `FP` Focus Points to get at least 1 `Tick` on `Timeline` ahead. EDIT EDIT
+ - `Indes` is a `Pause` for both P1 and P2
  
-***Indes must serve as the Active Pause mechanism in the proposed system. Both players secretly commit their decisive Indes action simultaneously and cofirm the choice to unpause the action, allowing the outcome to be determined by the interaction of their choices, not by a fixed initiative order.***
+ - Both players secretly commit their decisive Indes `Action` simultaneously and cofirm the choice to unpause the game, allowing the outcome to be determined by the interaction of their choices.
+  
+ - `LeaverageMeter` for both P1 and P2 is visible to both of them (**Fuhlen**)
+ - Winner of Hitter-Taker-Provoker (Rock-Papaer-Scissors), makes the final decisionn.
 
 
 ---
 
 ### Bind: Quantifying Fühlen (Strone and Weak Leverage) with The Leverage Track: 
 
-   - **Fühlen:** trained instinct to judge the opponent's leverage (Strong or Weak) and makes a definitive counter-action (a winding, a disengage, or a press).
-   - **Leverage:** (Strong or Weak) Leverage Track (Stark/Swach Meter)
+- **Fühlen:** trained instinct to judge the opponent's leverage (**Strong-Stark** or **Weak-Swach**) and makes a definitive counter-action (a winding, a disengage, or a press).
+- **Leverage:** `LeverageTrack` is a **Stark/Swach Meter**
 
+- `LeverageTrack`: **Stark/Swach Meter**
    - ***Mechanic: **Leverage Track**, scaled from +3 (Max Stark) to -3 (Max Swach)***
      - **Stark State** (+1 to +3): Indicates the fencer possesses structural advantage and safety. Available actions are "Hard" (applying direct pressure, executing a powerful strike, or maintaining the bind).   
      - **Swach State** (-1 to -3): Indicates structural vulnerability. The fencer must utilize "Soft" actions (disengaging, retreating, or Winding) to escape the pressure. Failure to act softly when in a Swach state leads to catastrophic displacement and injury.
 
-***The position on Leverage Track is the direct outcome of the players' simultaneous action choices (the Indes resolution). By visualizing this state, the game simulates the tactical judgment required of a master fencer to "feel well if he is weak or strong at the sword".***
+  ***The position on Leverage Track is the direct outcome of the players' simultaneous action choices (the Indes resolution). By visualizing this state, the game simulates the tactical judgment required of a master fencer to "feel well if he is weak or strong at the sword".***
 
 ---
 
