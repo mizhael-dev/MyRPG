@@ -27,9 +27,10 @@ interface ActionPanelProps {
   ) => void;
   onExecuteFeint: (newAttackId: string) => void;
   onWait: () => void;
+  onHoverSkill?: (skillId: string | null) => void; // NEW: Callback for hover state
 }
 
-export function ActionPanel({ gameState, fighter, onExecuteSkill, onExecuteSkillWithPredictions, onExecuteFeint, onWait }: ActionPanelProps) {
+export function ActionPanel({ gameState, fighter, onExecuteSkill, onExecuteSkillWithPredictions, onExecuteFeint, onWait, onHoverSkill }: ActionPanelProps) {
   const currentFighter = gameState[fighter];
   const canAct = !currentFighter.currentAction;
   const fighterLabel = fighter === 'pc' ? 'PC' : 'NPC';
@@ -127,6 +128,8 @@ export function ActionPanel({ gameState, fighter, onExecuteSkill, onExecuteSkill
     const handleMouseEnter = (e: React.MouseEvent) => {
       setHoveredSkill(skillId);
       setTooltipPosition({ x: e.clientX, y: e.clientY });
+      // Notify parent component for ghost preview
+      onHoverSkill?.(skillId);
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {
@@ -137,6 +140,8 @@ export function ActionPanel({ gameState, fighter, onExecuteSkill, onExecuteSkill
 
     const handleMouseLeave = () => {
       setHoveredSkill(null);
+      // Clear ghost preview
+      onHoverSkill?.(null);
     };
 
     return (

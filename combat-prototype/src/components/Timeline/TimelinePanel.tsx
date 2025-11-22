@@ -93,15 +93,18 @@ if (TIMELINE_CONFIG.PAST_MS > TIMELINE_CONFIG.ZOOM_MS) {
 interface TimelinePanelProps {
   gameState: GameState;
   viewMode: ViewMode;
+  hoveredSkillId: string | null; // NEW: Skill being hovered for ghost preview
 }
 
-export function TimelinePanel({ gameState, viewMode }: TimelinePanelProps) {
+export function TimelinePanel({ gameState, viewMode, hoveredSkillId }: TimelinePanelProps) {
   // -------------------------------------------------------------------------
   // STATE & REFS
   // -------------------------------------------------------------------------
 
   const viewportRef = useRef<HTMLDivElement>(null); // Viewport (fixed width)
   const [viewportWidth, setViewportWidth] = useState(800); // Default width
+  const [isShaking, setIsShaking] = useState(false); // NEW: Impact shake effect
+  const lastLogLengthRef = useRef(0); // Track combat log length for impact detection
 
   // -------------------------------------------------------------------------
   // RESPONSIVE WIDTH TRACKING
@@ -118,6 +121,25 @@ export function TimelinePanel({ gameState, viewMode }: TimelinePanelProps) {
     window.addEventListener('resize', updateWidth);
     return () => window.removeEventListener('resize', updateWidth);
   }, []);
+
+  // -------------------------------------------------------------------------
+  // IMPACT SHAKE DETECTION
+  // -------------------------------------------------------------------------
+
+  useEffect(() => {
+    // Detect new impact messages in combat log
+    if (gameState.combatLog.length > lastLogLengthRef.current) {
+      const newLogs = gameState.combatLog.slice(lastLogLengthRef.current);
+      const hasImpact = newLogs.some(log => log.includes('Impact') || log.includes('HIT'));
+
+      if (hasImpact) {
+        setIsShaking(true);
+        setTimeout(() => setIsShaking(false), 200); // Shake for 200ms
+      }
+    }
+
+    lastLogLengthRef.current = gameState.combatLog.length;
+  }, [gameState.combatLog]);
 
   // -------------------------------------------------------------------------
   // PIXEL-TO-MS RATIO (HYBRID APPROACH)
@@ -170,6 +192,74 @@ export function TimelinePanel({ gameState, viewMode }: TimelinePanelProps) {
   }
 
   // Note: Auto-scroll behavior removed - timeline content moves via CSS transform instead
+
+  // -------------------------------------------------------------------------
+  // GHOST PREVIEW LOGIC
+  // -------------------------------------------------------------------------
+
+  let ghostPreview: {
+    skill: CombatSkill;
+    startTick: number;
+    interruptPrediction: 'player_wins' | 'player_loses' | 'none';
+    damageIndicatorTick?: number; // Where to show red flash if player loses
+    interruptTick?: number; // Where to gray out enemy if player wins
+  } | null = null;
+
+  if (hoveredSkillId) {
+    const hoveredSkill = gameState.loadedSkills.get(hoveredSkillId);
+
+    if (hoveredSkill) {
+      // Determine ghost start time
+      let ghostStartTick = gameState.currentTick;
+
+      // If PC has current action, ghost starts after it finishes
+      if (gameState.pc.currentAction) {
+        const pcAction = pcActions.find(a => a.fighterId === 'pc' && !a.endTick);
+        if (pcAction) {
+          ghostStartTick = pcAction.phases.recoveryEnd;
+        }
+      }
+
+      // Calculate ghost impact time (for attacks only)
+      let ghostImpactTick: number | undefined;
+      if (hoveredSkill.type === 'attack') {
+        ghostImpactTick = ghostStartTick + hoveredSkill.phases.impact.tick;
+      }
+
+      // Interrupt prediction logic
+      let interruptPrediction: 'player_wins' | 'player_loses' | 'none' = 'none';
+      let damageIndicatorTick: number | undefined;
+      let interruptTick: number | undefined;
+
+      // Check against NPC's current action
+      const npcCurrentAction = gameState.npc.currentAction;
+      if (npcCurrentAction && hoveredSkill.type === 'attack') {
+        const npcAction = npcActions.find(a => a.fighterId === 'npc');
+
+        if (npcAction && npcAction.skill.type === 'attack' && ghostImpactTick) {
+          const npcImpactTick = npcAction.startTick + npcAction.skill.phases.impact.tick;
+
+          if (ghostImpactTick < npcImpactTick) {
+            // Player wins - interrupt enemy
+            interruptPrediction = 'player_wins';
+            interruptTick = ghostImpactTick;
+          } else if (npcImpactTick < ghostImpactTick) {
+            // Player loses - take damage during wind-up/committed
+            interruptPrediction = 'player_loses';
+            damageIndicatorTick = npcImpactTick;
+          }
+        }
+      }
+
+      ghostPreview = {
+        skill: hoveredSkill,
+        startTick: ghostStartTick,
+        interruptPrediction,
+        damageIndicatorTick,
+        interruptTick,
+      };
+    }
+  }
 
   // -------------------------------------------------------------------------
   // LAYOUT CALCULATIONS
@@ -225,6 +315,19 @@ export function TimelinePanel({ gameState, viewMode }: TimelinePanelProps) {
 
   return (
     <div className="bg-gray-800 rounded px-4 py-2">
+      {/* CSS for shake animation */}
+      <style>{`
+        @keyframes shake {
+          0%, 100% { transform: translate(0, 0); }
+          25% { transform: translate(-2px, 2px); }
+          50% { transform: translate(2px, -2px); }
+          75% { transform: translate(-2px, -2px); }
+        }
+        .timeline-shake {
+          animation: shake 0.2s ease-in-out;
+        }
+      `}</style>
+
       <h3 className="text-lg font-bold mb-2">
         Combat Timelines
         {viewMode !== 'debug' && (
@@ -235,7 +338,7 @@ export function TimelinePanel({ gameState, viewMode }: TimelinePanelProps) {
       {/* Timeline viewport (fixed width, clips content) */}
       <div
         ref={viewportRef}
-        className="relative overflow-hidden"
+        className={`relative overflow-hidden ${isShaking ? 'timeline-shake' : ''}`}
         style={{
           width: '100%',
           height: `${totalHeight}px`
@@ -306,6 +409,49 @@ export function TimelinePanel({ gameState, viewMode }: TimelinePanelProps) {
           {showPcActual &&
             pcActions.map((action) => renderActionBars(action, positions.pcActual, true, pxPerMs, timebarHeight))}
 
+          {/* Ghost Preview - Render on PC_actual timebar only */}
+          {showPcActual && ghostPreview && (() => {
+            // Create a temporary ActionHistoryEntry for rendering
+            const ghostAction: ActionHistoryEntry = {
+              fighterId: 'pc',
+              skill: ghostPreview.skill,
+              startTick: ghostPreview.startTick,
+              endTick: ghostPreview.startTick, // Doesn't matter for rendering
+              phases: {
+                windUpEnd: ghostPreview.startTick + ghostPreview.skill.phases.windUp.duration,
+                committedEnd: ghostPreview.skill.type === 'attack'
+                  ? ghostPreview.startTick + ghostPreview.skill.phases.windUp.duration + ghostPreview.skill.phases.committed.duration
+                  : undefined,
+                activeEnd: ghostPreview.skill.type === 'defense' && ghostPreview.skill.phases.active
+                  ? ghostPreview.startTick + ghostPreview.skill.phases.windUp.duration + ghostPreview.skill.phases.active.duration
+                  : undefined,
+                impactTick: ghostPreview.skill.type === 'attack'
+                  ? ghostPreview.startTick + ghostPreview.skill.phases.impact.tick
+                  : undefined,
+                recoveryEnd: ghostPreview.skill.type === 'attack'
+                  ? ghostPreview.startTick + ghostPreview.skill.phases.impact.tick + ghostPreview.skill.phases.recovery.duration
+                  : ghostPreview.startTick + ghostPreview.skill.phases.windUp.duration + (ghostPreview.skill.phases.active?.duration || 0) + ghostPreview.skill.phases.recovery.duration,
+              },
+            };
+
+            return renderActionBars(ghostAction, positions.pcActual, true, pxPerMs, timebarHeight, 0.5, 'ghost-');
+          })()}
+
+          {/* Damage Indicator - Red flash where player takes damage */}
+          {showPcActual && ghostPreview?.damageIndicatorTick && (
+            <div
+              className="absolute z-20 animate-pulse"
+              style={{
+                left: `${ghostPreview.damageIndicatorTick * pxPerMs}px`,
+                top: `${positions.pcActual}px`,
+                width: '4px',
+                height: `${timebarHeight}px`,
+                backgroundColor: '#FF3333',
+                boxShadow: '0 0 10px #FF3333',
+              }}
+            />
+          )}
+
           {/* Timebar 2: PC_seen_by_NPC */}
           {showPcSeenByNpc &&
             pcActions.map((action) =>
@@ -315,6 +461,40 @@ export function TimelinePanel({ gameState, viewMode }: TimelinePanelProps) {
           {/* Timebar 3: NPC_actual */}
           {showNpcActual &&
             npcActions.map((action) => renderActionBars(action, positions.npcActual, true, pxPerMs, timebarHeight))}
+
+          {/* Interrupt Effect - Gray out enemy action + crack texture when player wins */}
+          {showNpcActual && ghostPreview?.interruptPrediction === 'player_wins' && ghostPreview.interruptTick && (() => {
+            const npcAction = npcActions.find(a => a.fighterId === 'npc');
+            if (!npcAction) return null;
+
+            // Calculate the interrupted portion (from interrupt point to end)
+            const interruptPx = ghostPreview.interruptTick * pxPerMs;
+            const actionEndPx = npcAction.phases.recoveryEnd * pxPerMs;
+            const actionStartPx = npcAction.startTick * pxPerMs;
+
+            // Only show if interrupt happens during the action
+            if (interruptPx < actionStartPx || interruptPx > actionEndPx) return null;
+
+            return (
+              <div
+                className="absolute z-10 pointer-events-none"
+                style={{
+                  left: `${interruptPx}px`,
+                  top: `${positions.npcActual}px`,
+                  width: `${actionEndPx - interruptPx}px`,
+                  height: `${timebarHeight}px`,
+                  backgroundColor: 'rgba(85, 85, 85, 0.7)', // Dark gray overlay
+                  backgroundImage: `repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(0,0,0,0.4) 10px,
+                    rgba(0,0,0,0.4) 12px
+                  )`, // Crack texture
+                }}
+              />
+            );
+          })()}
 
           {/* Timebar 4: NPC_seen_by_PC */}
           {showNpcSeenByPc &&
@@ -414,7 +594,9 @@ function renderActionBars(
   yOffset: number,
   showSkillName: boolean,
   pxPerMs: number,
-  height: number
+  height: number,
+  opacity: number = 1.0, // NEW: Support opacity for ghost preview
+  keyPrefix: string = '' // NEW: Key prefix to avoid collisions
 ): JSX.Element {
   const startPx = action.startTick * pxPerMs;
   const skill = action.skill;
@@ -434,12 +616,13 @@ function renderActionBars(
 
   return (
     <div
-      key={`${action.fighterId}-${action.startTick}`}
+      key={`${keyPrefix}${action.fighterId}-${action.startTick}`}
       className="absolute flex"
       style={{
         left: `${startPx}px`,
         top: `${yOffset}px`,
         height: `${height}px`,
+        opacity: opacity,
       }}
     >
       {/* PHASE 1: Wind-up (GREEN) */}
@@ -448,6 +631,7 @@ function renderActionBars(
         style={{
           width: `${windUpWidth}px`,
           backgroundColor: '#84db90',
+          border: opacity < 1 ? '1px solid #84db90' : 'none', // Highlight border for ghost
         }}
       />
 
@@ -458,6 +642,7 @@ function renderActionBars(
           style={{
             width: `${committedWidth}px`,
             backgroundColor: '#ffc824',
+            border: opacity < 1 ? '1px solid #ffc824' : 'none', // Highlight border for ghost
           }}
         />
       ) : (
@@ -466,6 +651,7 @@ function renderActionBars(
           style={{
             width: `${activeWidth}px`,
             backgroundColor: '#d9d9d9',
+            border: opacity < 1 ? '1px solid #d9d9d9' : 'none', // Highlight border for ghost
           }}
         />
       )}
@@ -487,6 +673,7 @@ function renderActionBars(
         style={{
           width: `${recoveryWidth}px`,
           backgroundColor: '#db5a5a',
+          border: opacity < 1 ? '1px solid #db5a5a' : 'none', // Highlight border for ghost
         }}
       />
 
@@ -494,6 +681,18 @@ function renderActionBars(
       {showSkillName && (
         <div className="absolute inset-0 flex items-center pl-2 text-xs text-white font-semibold pointer-events-none">
           {skill.name}
+        </div>
+      )}
+
+      {/* Time cost label (below bar) - NEW */}
+      {showSkillName && (
+        <div
+          className="absolute top-full left-2 text-[10px] text-gray-400 pointer-events-none whitespace-nowrap"
+          style={{ marginTop: '2px' }}
+        >
+          {skill.type === 'attack'
+            ? `${(skill.phases.impact.tick / 1000).toFixed(1)}s`
+            : `${((skill.phases.windUp.duration + (skill.phases.active?.duration || 0)) / 1000).toFixed(1)}s`}
         </div>
       )}
     </div>

@@ -26,6 +26,7 @@ export function CombatScene() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('debug');
   const [failedPredictionFighter, setFailedPredictionFighter] = useState<string | null>(null);
+  const [hoveredSkillId, setHoveredSkillId] = useState<string | null>(null); // NEW: Track hovered skill for ghost preview
 
   // Run once when component mounts
   useEffect(() => {
@@ -229,6 +230,7 @@ export function CombatScene() {
                 engine.togglePause();
               }
             }}
+            onHoverSkill={setHoveredSkillId}
           />
         </div>
 
@@ -262,7 +264,7 @@ export function CombatScene() {
           </div>
 
           {/* Timeline Visualization */}
-          <TimelinePanel gameState={gameState} viewMode={viewMode} />
+          <TimelinePanel gameState={gameState} viewMode={viewMode} hoveredSkillId={hoveredSkillId} />
 
           {/* Telegraph Stages Display */}
           <div className="grid grid-cols-2 gap-4">
@@ -431,6 +433,7 @@ export function CombatScene() {
                 engine.togglePause();
               }
             }}
+            onHoverSkill={setHoveredSkillId}
           />
         </div>
       </div>
