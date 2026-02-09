@@ -29,7 +29,7 @@ Every decision (in combat or narrative) carries a lasting effect — sacrifice, 
 
 ### Risk and Consequence
 Power costs something — magic drains life, madness, or stability.
-- every physical attack can be stronger or weaker depending how much effort (stamina) the user puts into it
+- every physical attack can be stronger or weaker depending how much effort (AP, stamina) the user puts into it
 - stronger attacks take mroe time or require a longer time to recover after the attack and before taking another action
 - very physical attack can be stronger or weaker depending how much mana the user puts into it
 
